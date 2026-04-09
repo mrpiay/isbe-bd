@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BD Workflow · ISBE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f9f8f5;--surface:#ffffff;--surface2:#f4f3ef;--border:#e5e4df;--border2:#d0cfc8;
+  --text:#1a1a18;--text2:#6b6b63;--text3:#a0a099;
+  --purple:#534AB7;--purple-bg:#EEEDFE;--purple-border:#AFA9EC;
+  --green:#0F6E56;--green-bg:#E1F5EE;--green-border:#9FE1CB;
+  --blue:#185FA5;--blue-bg:#E6F1FB;--blue-border:rgba(24,95,165,0.25);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{width:100%;padding:2rem 2rem}
+
+.page-header{margin-bottom:1.75rem;text-align:center}
+.page-name{font-size:26px;font-weight:600;letter-spacing:-0.4px;margin-bottom:6px}
+.page-role{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+.page-sub{font-size:13px;color:var(--text2);line-height:1.5}
+.nav{display:flex;gap:4px;margin-bottom:2rem;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:4px}
+.nav-btn{flex:1;font-size:13px;padding:9px 12px;cursor:pointer;border:none;background:none;color:var(--text2);border-radius:8px;transition:all .15s;font-family:'Inter',sans-serif;font-weight:500}
+.nav-btn:hover{color:var(--text);background:var(--border)}
+.nav-btn.active{background:var(--surface);color:var(--text);border:1px solid var(--border2);box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.view{display:none}.view.active{display:block}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);font-weight:500;margin-bottom:1rem}
+
+.phase-strip{display:flex;gap:4px;margin-bottom:1.25rem;overflow-x:auto;padding-bottom:4px}
+.phase-btn{flex:1;min-width:90px;padding:.65rem .4rem;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--surface);transition:all .15s;border-radius:10px;font-family:'Inter',sans-serif}
+.phase-btn:hover:not(.active){background:var(--surface2);border-color:var(--border2)}
+.phase-btn.active{border-color:var(--active-c,var(--purple));background:var(--purple-bg)}
+.ph-dot{width:7px;height:7px;border-radius:50%;margin:0 auto 5px;background:var(--border2);transition:background .15s}
+.phase-btn.active .ph-dot{background:var(--active-c,var(--purple))}
+.ph-num{font-size:10px;color:var(--text3);margin-bottom:2px}
+.ph-label{font-size:12px;font-weight:500;color:var(--text2);line-height:1.3}
+.phase-btn.active .ph-label{color:var(--text)}
+
+.detail-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface)}
+.dc-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.dc-title{font-size:15px;font-weight:500;margin-bottom:6px}
+.dc-sub{font-size:13.5px;color:var(--text2);line-height:1.65}
+.dc-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;margin-top:3px}
+
+.tool-group{display:flex;flex-direction:column;gap:.75rem}
+.tool-group-hd{font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:5px;display:inline-block;margin-bottom:.1rem}
+.tool-group-mcp{background:var(--purple-bg);color:var(--purple)}
+.tool-group-manual{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.tool-chip-mcp{background:var(--purple-bg);color:var(--purple);border-color:var(--purple-border)}
+.tool-chip-manual{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}.dc-rows-wrap{border-bottom:1px solid var(--border)}
+.dc-rows-wrap .dc-row{border-right:none;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.dc-rows-wrap .dc-row:last-child{border-bottom:none}
+.row-hd{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);font-weight:500;margin-bottom:.9rem}
+.tools-list{display:flex;flex-direction:column;gap:.8rem}
+.tool-item{display:flex;flex-direction:column;gap:5px;margin-bottom:.75rem}
+.tool-item:last-child{margin-bottom:0}
+.tool-chip{font-size:11.5px;padding:3px 10px;border-radius:6px;font-weight:500;border:1px solid;white-space:nowrap;align-self:flex-start}
+.tool-desc{font-size:13px;color:var(--text2);line-height:1.65}
+
+.storage-block{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:10px;padding:1.1rem 1.2rem}
+.storage-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--blue);font-weight:500;margin-bottom:.5rem}
+.storage-text{font-size:13px;color:var(--text2);line-height:1.65}
+.storage-ref{margin-top:.65rem;font-size:12px;font-weight:500;color:var(--blue)}
+
+.dc-flow{padding:.9rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.flow-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);font-weight:500;width:100%;margin-bottom:4px}
+.flow-node{font-size:11px;padding:4px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:6px;color:var(--text3);white-space:nowrap}
+.flow-node.mcp{border-color:var(--purple-border);color:var(--purple);background:var(--purple-bg)}
+.flow-node.manual{border-color:var(--green-border);color:var(--green);background:var(--green-bg)}
+.flow-arr{font-size:12px;color:var(--border2)}
+
+.dc-ai{padding:1.1rem 1.5rem;background:#EEEDFE}
+.ai-hd{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--purple);font-weight:500;margin-bottom:.75rem}
+.ai-prompts{display:flex;flex-direction:column;gap:7px}
+.ai-prompt{font-size:13px;color:var(--text2);background:var(--surface);border:1px solid var(--purple-border);border-radius:8px;padding:.7rem 1rem;line-height:1.55;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.ai-prompt:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+.ai-prompt-active{border-color:var(--purple);background:var(--purple-bg);color:var(--purple)}
+.ai-chat{margin-top:.9rem;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.ai-chat-msgs{display:flex;flex-direction:column;gap:8px;padding:1rem}
+.sim-msg{max-width:86%;padding:.65rem 1rem;font-size:13px;line-height:1.6;border-radius:10px}
+.sim-user{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--text);align-self:flex-end;border-radius:10px 10px 3px 10px}
+.sim-ai{background:var(--surface2);border:1px solid var(--border);color:var(--text);align-self:flex-start;border-radius:10px 10px 10px 3px;white-space:pre-line}
+
+.ai-arrow{color:var(--purple);flex-shrink:0;font-weight:500}
+
+.cases-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:1.25rem}
+.case-card{border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden;cursor:pointer;transition:all .15s}
+.case-card:hover{border-color:var(--border2);box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+.case-card.active{border-color:var(--active-c,var(--purple))}
+.case-top{padding:1rem 1.1rem .85rem;border-bottom:1px solid var(--border)}
+.case-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:.6rem}
+.case-name{font-size:14px;font-weight:500;margin-bottom:4px}
+.case-desc{font-size:12.5px;color:var(--text2);line-height:1.55}
+.case-body{display:none;padding:1rem 1.1rem}
+.case-card.active .case-body{display:block}
+.case-section{margin-bottom:1rem}
+.case-section:last-child{margin-bottom:0}
+.case-stitle{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;font-weight:500}
+.case-stext{font-size:13px;color:var(--text2);line-height:1.65}
+.case-steps{list-style:none;display:flex;flex-direction:column;gap:6px}
+.case-steps li{font-size:12.5px;color:var(--text2);padding-left:1.1rem;position:relative;line-height:1.55}
+.case-steps li::before{content:"·";position:absolute;left:0;color:var(--active-c,var(--purple));font-size:16px;line-height:1.2}
+.case-icp{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.case-icp span{font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--border2);color:var(--text3)}
+
+.demo-block{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.demo-header{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:.75rem}
+.demo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.demo-title{font-size:14px;font-weight:500}
+.demo-msgs{padding:1rem 1.2rem;min-height:260px;display:flex;flex-direction:column;gap:8px}
+.dmsg{max-width:84%;padding:.7rem 1rem;font-size:13px;line-height:1.55;border-radius:12px;border:1px solid var(--border)}
+.dmsg-sys{background:var(--surface2);color:var(--text2);align-self:flex-start;border-radius:12px 12px 12px 3px}
+.dmsg-user{background:var(--purple-bg);border-color:var(--purple-border);color:var(--text);align-self:flex-end;border-radius:12px 12px 3px 12px}
+.dmsg-ai{background:var(--surface2);color:var(--text);align-self:flex-start;border-radius:12px 12px 12px 3px}
+.dmsg-typing{background:var(--surface2);color:var(--text3);align-self:flex-start;padding:.6rem 1rem;border-radius:12px;font-size:12px;border:1px solid var(--border)}
+.q-chips{display:flex;flex-wrap:wrap;gap:6px;padding:.65rem 1.2rem;border-top:1px solid var(--border)}
+.qchip{font-size:11.5px;padding:4px 11px;border:1px solid var(--border2);border-radius:20px;cursor:pointer;background:var(--surface);color:var(--text2);transition:all .15s;font-family:'Inter',sans-serif}
+.qchip:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+.qchip-active{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+.demo-input-row{border-top:1px solid var(--border);padding:.8rem 1.2rem;display:flex;gap:8px}
+.demo-input-row input{flex:1;border:1px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:13px;background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+.demo-input-row input:focus{border-color:var(--purple)}
+.demo-input-row input::placeholder{color:var(--text3)}
+.send-btn{border:1px solid var(--purple-border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;background:var(--purple-bg);color:var(--purple);font-family:'Inter',sans-serif;font-weight:500;transition:all .15s;white-space:nowrap}
+.send-btn:hover{background:#CECBF6}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-name">Javier Piay</div>
+    <div class="page-role">Candidato a Business Development Lead · ISBE</div>
+    <div class="page-sub">Demostración de conocimiento del ecosistema, capacidad operativa y uso de IA para acelerar el pipeline comercial</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="switchView('workflow',this)">Workflow</button>
+    <button class="nav-btn" onclick="switchView('demos',this)">Casos demo</button>
+    <button class="nav-btn" onclick="switchView('mcp',this)">Arquitectura MCP</button>
+  </div>
+
+  <div id="workflow" class="view active">
+    <div class="section-label">Pipeline de desarrollo de negocio — 6 fases</div>
+    <div class="phase-strip" id="phase-strip"></div>
+    <div class="detail-card" id="detail-card"></div>
+  </div>
+
+  <div id="demos" class="view">
+    <div class="section-label">Casos de uso — selecciona uno para explorar el pitch y simular conversaciones con el cliente</div>
+    <div class="cases-grid" id="cases-grid"></div>
+    <div class="demo-block">
+      <div class="demo-header">
+        <div class="demo-dot" id="demo-dot" style="background:var(--purple)"></div>
+        <div class="demo-title" id="demo-title">Selecciona un caso de uso</div>
+      </div>
+      <div class="demo-msgs" id="demo-msgs">
+        <div class="dmsg dmsg-sys">Selecciona un caso de uso para ver el problema que resuelve ISBE, el pitch comercial y cómo desarrollaría el pipeline. El chat de abajo simula cómo usaría un asistente con IA durante la preparación de una reunión: para anticipar objeciones, adaptar el discurso al interlocutor (CIO, CFO, Legal) o consultar la regulación relevante antes de hablar con un cliente.</div>
+      </div>
+      <div class="q-chips" id="q-chips"></div>
+      <div class="demo-input-row">
+        <input id="demo-in" type="text" placeholder="Las preguntas de ejemplo muestran respuestas reales" disabled style="opacity:.5;cursor:not-allowed"/>
+        <button class="send-btn" onclick="" disabled style="opacity:.4;cursor:not-allowed">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const PHASES=[
+  {
+    num:"01",label:"ICP y\ncuentas",color:"#185FA5",
+    badge:"Research",badgeBg:"#E6F1FB",badgeCol:"#185FA5",
+    title:"Definición del perfil de cliente ideal y construcción de la lista de cuentas target",
+    sub:"Antes de contactar a nadie, defino con precisión qué tipo de empresa tiene más probabilidades de necesitar ISBE: sector regulado, operaciones en varios países de la UE, presión de cumplimiento normativo activa y capacidad técnica para integrar una red DLT. Sin ese filtro previo, el outreach pierde tiempo en cuentas que nunca van a cerrar.",
+    tools:[
+      {chip:"Brave Search MCP",type:"mcp",desc:"Claude busca en tiempo real noticias recientes de cada cuenta objetivo e identifica señales de interés: menciones a DLT, proyectos de digitalización, presión regulatoria activa o contrataciones en el área de innovación. El resultado alimenta el scoring de fit sin búsqueda manual."},
+      {chip:"Filesystem MCP",type:"mcp",desc:"Claude lee el template de scoring desde la carpeta local bd-isbe y lo rellena con los datos de la cuenta investigada, generando una ficha estructurada lista para importar como nota del Company en HubSpot."},
+      {chip:"LinkedIn Sales Navigator",type:"manual",desc:"Filtro manual por sector, tamaño de empresa (más de 200 empleados), país y señales de actividad reciente. Guardo las cuentas en listas segmentadas por vertical para lanzar secuencias específicas a cada una."},
+      {chip:"Apollo.io",type:"manual",desc:"Enriquecimiento manual del registro con email verificado, número directo y datos adicionales (financiación, tecnologías, tamaño del equipo técnico). Reduce las horas de búsqueda por cuenta antes de iniciar el outreach."},
+    ],
+    storage:"Para cada cuenta cualificada creo un registro de Company en HubSpot con propiedades custom: 'Caso de uso potencial', 'Sector', 'Stakeholders identificados' y 'Score de fit ISBE' del 1 al 5. Estos campos permiten filtrar el pipeline por segmento y priorizar cuentas para las campañas ABM.",
+    storageRef:"HubSpot CRM → Companies con propiedades custom + vistas de pipeline segmentadas por vertical",
+    flow:["Brave Search MCP","→","Filesystem MCP scoring","→","LinkedIn cualifica","→","Apollo enriquece","→","Company en HubSpot"],
+    ai:[
+      {
+        q:"Resume los últimos 6 meses de noticias de esta empresa e identifica señales de interés en identidad digital, trazabilidad de datos o cumplimiento normativo europeo",
+        a:"Análisis de Banco Sabadell (últimos 6 meses):\n\n• Publicaron una convocatoria de Head of Digital Identity en febrero — señal directa de inversión en identidad soberana.\n• Firmaron adhesión al Grupo de Trabajo de eIDAS 2 de la AEB en marzo junto con CaixaBank y BBVA.\n• Su CTO mencionó en FinTech Forum Barcelona la necesidad de \"infraestructura de confianza compartida\" para reducir el coste de KYC.\n• Están bajo presión del Banco de España para actualizar su proceso de onboarding digital antes de Q4 2025.\n\nSeñal de fit: ALTA. Hay urgencia regulatoria, presupuesto activo y un champion técnico identificable. Recomiendo priorizar esta cuenta en la secuencia ABM de banca/identidad."
+      },
+      {
+        q:"Puntúa esta empresa del 1 al 5 como cuenta target de ISBE: sector regulado, más de 200 empleados, operaciones en varios países UE, menciones a DLT o digitalización",
+        a:"Scoring de fit ISBE — Correos Digital:\n\n• Sector regulado: ✓ (operador postal público, sujeto a GDPR y normativa de servicios de confianza) → 1 pto\n• Tamaño: ✓ (más de 50.000 empleados, área digital con equipo de +200 personas) → 1 pto\n• Presencia UE: ✓ parcial (operaciones principalmente España, proyectos europeos CEF en curso) → 0,5 ptos\n• Menciones DLT/digitalización: ✓ (proyecto piloto de certificación documental con blockchain anunciado en 2023, sin completar) → 1 pto\n• Urgencia regulatoria activa: ✓ (eIDAS 2 les afecta como prestador de servicios de confianza cualificado) → 1 pto\n\nPuntuación total: 4,5/5 — Cuenta A. Incluir en próxima secuencia ABM vertical AAPP/identidad."
+      },
+      {
+        q:"De los tres casos de uso de ISBE (tokenización, trazabilidad, identidad digital), ¿cuál encaja mejor con el modelo de negocio de esta empresa y por qué?",
+        a:"Para Repsol Digital Hub, el caso de uso más sólido es trazabilidad, con potencial secundario en tokenización.\n\nTrazabilidad: Repsol está bajo presión directa de CSRD para reportar emisiones verificables en toda su cadena de valor, incluyendo proveedores y logística. Hoy ese proceso depende de auditorías manuales caras y lentas. Una red permisionada donde cada actor de la cadena registre sus datos de emisiones de forma inmutable resuelve exactamente ese problema — y elimina la dependencia de un auditor centralizado para cada ciclo de reporte.\n\nTokenización: hay un caso secundario interesante en certificados de energía renovable (GOs) y en activos de compensación de carbono, que Repsol está explorando. Es un ángulo para la segunda reunión, no para el primer contacto.\n\nRecomendación de entrada: pitch de trazabilidad con ángulo CSRD para el primer email. Stakeholder objetivo: Director de Sostenibilidad o Head of Digital, no CTO."
+      },
+    ]
+  },
+  {
+    num:"02",label:"Outreach\nABM",color:"#534AB7",
+    badge:"Contacto",badgeBg:"#EEEDFE",badgeCol:"#534AB7",
+    title:"Primer contacto personalizado por cuenta — campañas ABM",
+    sub:"Cada cuenta recibe un mensaje construido específicamente para ella: sector, regulación que le afecta directamente (eIDAS 2, CSRD, EUDR) y caso de uso de ISBE más relevante. Un mensaje que podría haberse enviado a 500 empresas no funciona en este mercado.",
+    tools:[
+      {chip:"HubSpot MCP",type:"mcp",desc:"Claude crea el Deal en la etapa correcta del pipeline, registra el primer touchpoint en el Activity Feed del Contact y programa las tareas de follow-up con fechas, todo desde la conversación sin entrar al CRM."},
+      {chip:"Filesystem MCP",type:"mcp",desc:"Claude lee el template de email ABM del sector correspondiente desde la carpeta local, lo personaliza con el contexto de la cuenta y genera el mensaje final referenciando la regulación concreta que afecta a esa empresa."},
+      {chip:"LinkedIn Sales Navigator",type:"manual",desc:"InMail directo a decisores que no responden al email. Tasas de apertura notablemente más altas en perfiles C-level. Se personaliza con algo concreto de la empresa: noticia reciente, proyecto anunciado o regulación próxima."},
+      {chip:"Lemlist / Outreach.io",type:"manual",desc:"Cadencia multicanal con variables dinámicas por cuenta. Gestiona los follow-ups automáticos y pausa la secuencia en el momento que el contacto responde."},
+    ],
+    storage:"Cada touchpoint (email enviado, apertura, clic, respuesta) queda registrado automáticamente en el Activity Feed en HubSpot. Al recibir respuesta positiva, el Deal avanza a 'Contacto iniciado' con el contexto de la conversación anotado.",
+    storageRef:"HubSpot → Contact Activity Feed + Deals en etapa 'Contacto iniciado'",
+    flow:["Filesystem MCP redacta","→","HubSpot MCP crea Deal","→","Lemlist cadencia","→","LinkedIn InMail","→","Respuesta → Deal activo"],
+    ai:[
+      {
+        q:"Escribe un email de primer contacto para el CIO de una empresa energética sobre cómo ISBE puede certificar emisiones de CO₂ verificables bajo CSRD, sin auditor externo en cada reporte",
+        a:"Asunto: Certificación de emisiones verificable para su reporte CSRD — sin auditoría manual\n\nEstimado [Nombre],\n\nLa entrada en vigor de CSRD obliga a Endesa a reportar emisiones verificables en toda la cadena de valor antes de cierre de ejercicio 2025. El problema habitual no es la falta de datos — es demostrar que esos datos son fiables sin depender de una auditoría manual en cada ciclo.\n\nISBE es la infraestructura blockchain permisionada promovida por la Comunidad de Madrid sobre la que empresas del sector energético están construyendo registros de emisiones inmutables: cada evento de la cadena queda firmado digitalmente por el actor que lo genera, con timestamp verificable y sin posibilidad de modificación retroactiva.\n\nEl resultado es un audit trail que satisface los requisitos de CSRD sin necesitar un auditor externo para cada reporte trimestral.\n\n¿Tendría 20 minutos la semana que viene para explorar si esto encaja con su roadmap de sostenibilidad?\n\nUn saludo,\n[Nombre]"
+      },
+      {
+        q:"Genera una secuencia de 3 mensajes (email, follow-up, LinkedIn) para un responsable de Compliance bancario sobre eIDAS 2 y KYC portátil con credenciales verificables",
+        a:"Mensaje 1 — Email de presentación:\nAsunto: eIDAS 2 y KYC portátil — cómo reducir el coste de onboarding desde infraestructura compartida\n\n\"El reglamento eIDAS 2 va a cambiar cómo los bancos verifican identidades. Las entidades que construyan sobre infraestructura de credenciales verificables ahora tendrán ventaja de tiempo de mercado cuando la obligación sea efectiva. ISBE ofrece esa capa de infraestructura — permisionada, soberana y conforme a eIDAS 2. ¿Hablamos?\"\n\n---\nMensaje 2 — Follow-up (día 5):\n\"[Nombre], solo quería asegurarme de que mi email anterior llegó. Tres bancos de la red Alastria ya están evaluando credenciales verificables para onboarding. Si le interesa ver cómo lo están planteando, puedo compartirle el caso de uso en 15 minutos.\"\n\n---\nMensaje 3 — LinkedIn InMail (día 10):\n\"Hola [Nombre], le contacté por email sobre eIDAS 2 e infraestructura de identidad digital. Dado su rol en Compliance, creo que la pregunta de cómo gestionar la transición al nuevo marco sin construir infraestructura propia puede ser relevante. ¿Le parece si lo exploramos brevemente?\""
+      },
+      {
+        q:"¿Qué objeciones tendría un CTO ante una propuesta de unirse a una red blockchain permisionada? Las tres más frecuentes y cómo responderlas",
+        a:"Objeción 1: \"Ya tenemos infraestructura propia, ¿por qué necesitamos una red externa?\"\nRespuesta: ISBE no reemplaza vuestra infraestructura — se conecta a ella mediante APIs REST. La ventaja no es técnica para vosotros, es de red: el valor está en que los otros participantes (proveedores, reguladores, clientes) también confíen en el mismo registro, cosa que no consigues con un sistema interno por muy bien construido que esté.\n\nObjeción 2: \"Blockchain es lento y no escala.\"\nRespuesta: Eso es cierto para blockchains públicas con consenso abierto. ISBE es una red permisionada con un número controlado de nodos validadores, lo que permite throughput y latencia comparables a sistemas empresariales tradicionales. No es Ethereum — es infraestructura de empresa.\n\nObjeción 3: \"¿Quién controla la red? No queremos depender de un tercero.\"\nRespuesta: La gobernanza de ISBE es consortial — ningún participante tiene control unilateral, incluyendo Alastria. Cada organización que se conecta mantiene soberanía sobre sus propios datos: decide qué comparte, con quién y en qué condiciones. Eso es precisamente lo que diferencia una red permisionada de un SaaS centralizado."
+      },
+    ]
+  },
+  {
+    num:"03",label:"Discovery\ncall",color:"#0F6E56",
+    badge:"Cualificación",badgeBg:"#E1F5EE",badgeCol:"#0F6E56",
+    title:"Discovery call — entender el problema real y mapear quién toma la decisión",
+    sub:"Una discovery bien hecha vale más que diez demos. El objetivo no es presentar ISBE sino entender si el problema de esa empresa es el que ISBE resuelve, y si las condiciones están dadas: presupuesto identificado, urgencia real y alguien con autoridad para decir que sí.",
+    tools:[
+      {chip:"Google Drive MCP",type:"mcp",desc:"Tras la llamada, Claude lee la transcripción almacenada en Drive, extrae los puntos clave (problema, stakeholders, objeciones, próximos pasos) y genera el resumen estructurado listo para registrar en HubSpot, sin revisar la grabación manualmente."},
+      {chip:"HubSpot MCP",type:"mcp",desc:"Claude avanza el Deal a 'Discovery completado', crea la nota con el template de discovery, registra los stakeholders como Contacts vinculados al Deal con su rol (presupuesto, influencia, posible bloqueador) y programa la tarea de follow-up."},
+      {chip:"Google Meet / Teams",type:"manual",desc:"La reunión en sí. Se graba con permiso explícito del cliente para poder revisar exactamente qué dijo sobre su problema, plazos o presupuesto."},
+      {chip:"Otter.ai / Grain",type:"manual",desc:"Transcripción automática con detección de momentos clave: problemas mencionados, competidores, plazos urgentes y cifras de presupuesto. Genera un resumen usable en minutos al terminar la llamada."},
+    ],
+    storage:"El Deal avanza en HubSpot a 'Discovery completado'. Stakeholders creados como Contacts con sus roles anotados. Grabación en Google Drive con enlace en la nota del Deal, consultable por cualquier compañero del equipo.",
+    storageRef:"HubSpot Deal → Notes + Contacts con roles + enlace a grabación en Drive",
+    flow:["Meet graba llamada","→","Otter transcribe","→","Drive MCP lee","→","HubSpot MCP actualiza Deal","→","Stakeholder map completo"],
+    ai:[
+      {
+        q:"Lee esta transcripción e identifica: problema principal, caso de uso potencial para ISBE, stakeholders mencionados y objeciones expresadas",
+        a:"Resumen de discovery — CaixaBank Tech (43 min):\n\nProblema principal: Su proceso de KYB para clientes corporativos tarda entre 8 y 15 días hábiles. El equipo de Compliance reconoció que el 60% de ese tiempo se pierde en verificar documentación que ya ha sido validada por otras entidades financieras del mismo grupo. Están buscando una solución antes del cierre de Q3.\n\nCaso de uso potencial: Identidad digital / KYB portátil — credenciales verificables emitidas una vez y reutilizables entre entidades del ecosistema Alastria. Encaje directo.\n\nStakeholders identificados:\n• Marta Solà (Head of Compliance) — tiene el problema y presupuesto parcial\n• Jordi Puig (CTO Digital Banking) — necesita validar la integración técnica, escepticismo moderado\n• Sin mencionar al CFO — el presupuesto full probablemente necesita aprobación adicional\n\nObjeciones expresadas:\n• \"¿Cómo garantizamos que los datos de nuestros clientes no salen de nuestra infraestructura?\" → abordar en siguiente reunión con arquitectura de privacidad\n• \"¿Cuánto tiempo de integración técnica requiere?\" → preparar estimación con equipo técnico ISBE"
+      },
+      {
+        q:"Con esta discovery, construye el mapa de stakeholders: quién tiene el presupuesto, quién influye, quién puede bloquear y quién es el champion más probable",
+        a:"Mapa de stakeholders — Generalitat de Catalunya:\n\n🟢 Champion: Carles Vidal, Director de Transformación Digital — es quien convocó la reunión, tiene urgencia declarada y habló en primera persona del problema. Está motivado para avanzar.\n\n💰 Presupuesto: La decisión final pasa por la Secretaría de Administración y Función Pública. Carles tiene autonomía para proyectos piloto hasta €80K; por encima necesita aprobación del Secretario.\n\n🔵 Influenciador técnico: Equipo de arquitectura de sistemas (no asistieron a la reunión, mencionados como validadores obligatorios). Hay que conseguir una reunión técnica antes de la propuesta.\n\n🔴 Posible bloqueador: Asesoría Jurídica interna — mencionaron que cualquier infraestructura externa requiere informe de la Abogacía de la Generalitat sobre protección de datos. Hay que anticipar este punto con documentación de cumplimiento GDPR de ISBE.\n\nEstrategia recomendada: proponer piloto acotado (≤€80K) para evitar el proceso de aprobación largo, con opción de ampliación. Preparar informe técnico-legal específico para el equipo jurídico."
+      },
+      {
+        q:"¿Qué preguntas clave no hice y debería plantear en la siguiente reunión para cualificar si este deal puede cerrarse en menos de 90 días?",
+        a:"Preguntas pendientes para cualificar el deal:\n\n1. Presupuesto: \"¿Tienen partida presupuestaria asignada para este proyecto en el ejercicio actual, o tendría que buscarse financiación adicional?\" — sin esto no hay deal en 90 días.\n\n2. Proceso de aprobación: \"¿Cuántas personas necesitan dar el visto bueno para aprobar un proyecto como este? ¿Cuál es el proceso típico desde que se decide hasta que se firma?\" — para calibrar el timeline real.\n\n3. Urgencia: \"¿Hay alguna fecha concreta (regulatoria, interna, de consejo) que haga que resolver esto antes de fin de año sea prioritario?\" — sin urgencia externa los deals se dilatan.\n\n4. Alternativas: \"¿Están evaluando otras soluciones en paralelo?\" — si hay un RFP en marcha, cambia completamente la estrategia.\n\n5. Decisor final: \"Si llegamos a un acuerdo técnico y comercial, ¿quién firma el contrato?\" — asegurarse de tener acceso al decisor económico antes de invertir más tiempo."
+      },
+    ]
+  },
+  {
+    num:"04",label:"Propuesta\ncomercial",color:"#854F0B",
+    badge:"Propuesta",badgeBg:"#FAEEDA",badgeCol:"#854F0B",
+    title:"Propuesta comercial adaptada al decisor, al sector y al caso de uso concreto",
+    sub:"No existe una propuesta estándar de ISBE que sirva para todos. A un CIO le hablo de soberanía de datos y tiempo de integración; a un CFO, de reducción del coste de auditoría y riesgo regulatorio evitado. El deck, los ejemplos y el business case cambian por sector y por interlocutor.",
+    tools:[
+      {chip:"Notion MCP",type:"mcp",desc:"Claude lee el template de propuesta del vertical correspondiente en Notion y recupera las últimas propuestas del mismo sector con su resultado, para contextualizar la nueva con lo que ha funcionado antes en deals similares."},
+      {chip:"Google Drive MCP",type:"mcp",desc:"Claude crea un Google Doc con el borrador completo de la propuesta adaptada al caso de uso concreto, incluyendo el business case y el executive summary en inglés si se requiere, listo para convertir en presentación."},
+      {chip:"HubSpot MCP",type:"mcp",desc:"Claude actualiza el Deal con ARR estimado, fecha de cierre prevista y probabilidad, y registra el Document enviado con su enlace de tracking. Estos campos alimentan el forecast del pipeline automáticamente."},
+      {chip:"Google Slides / Pitch.com",type:"manual",desc:"Maquetación manual del deck final a partir del borrador generado. Nunca se envía una propuesta que podría haber ido a otra empresa sin ningún cambio."},
+    ],
+    storage:"Deal en HubSpot en etapa 'Propuesta enviada' con ARR, fecha y probabilidad actualizados. Document vinculado con tracking de apertura por diapositiva. Propuesta guardada en Notion para referencia en deals futuros del mismo sector.",
+    storageRef:"HubSpot Deal → Document con tracking + ARR + fecha → forecast / Notion → repositorio de propuestas",
+    flow:["Notion MCP lee template","→","Drive MCP crea borrador","→","Maquetación manual","→","HubSpot MCP registra","→","Tracking de apertura activo"],
+    ai:[
+      {
+        q:"Lee el template de propuesta de logística en Notion y adapta el business case para una empresa que necesita certificar trazabilidad bajo EUDR",
+        a:"Business case adaptado — Trazabilidad EUDR para operador logístico:\n\nEl problema regulatorio: El Reglamento EUDR (Deforestación) obliga desde diciembre 2024 a demostrar que los productos importados (madera, soja, cacao, café, ganado, aceite de palma, caucho) no proceden de zonas deforestadas. El operador logístico que no pueda acreditar la cadena de custodia completa no puede tramitar la importación.\n\nCoste actual del proceso: Con el método actual (documentación en papel + verificación manual por cada lote), el equipo estima 3-4 días hábiles por expediente y un coste de €180-220 por gestión. Con 2.400 expedientes anuales, eso supone ~€480.000/año solo en gestión documental de origen.\n\nCon ISBE: Cada actor de la cadena (productor, transportista, intermediario) registra su evento en la red en tiempo real. El operador genera el certificado de trazabilidad en minutos, con firma digital válida como evidencia ante la Agencia Tributaria. Estimación de reducción de coste: 65-70% del proceso manual.\n\nROI estimado a 12 meses: Coste del piloto ISBE (€45.000) vs ahorro proyectado (€310.000). Payback en menos de 2 meses tras puesta en producción."
+      },
+      {
+        q:"Genera el business case para una consultora: coste de construir la misma infraestructura internamente frente a usar ISBE como capa ya operativa",
+        a:"Build vs. Buy — Infraestructura DLT para consultora tecnológica:\n\nOpción Build (construir internamente):\n• Infraestructura de red: 6-9 meses de desarrollo, equipo mínimo de 4 ingenieros senior en blockchain → ~€380.000 solo en desarrollo inicial\n• Operación y mantenimiento: 2 personas dedicadas + costes de infraestructura cloud → €120.000/año\n• Certificaciones de seguridad y cumplimiento eIDAS: €40.000-60.000 adicionales\n• Tiempo hasta primera demo a cliente: 12-18 meses\n• Riesgo: sin red de participantes, el valor para el cliente final es limitado — la red vale lo que valen sus nodos\n\nOpción Buy (ISBE como capa de red):\n• Integración API sobre red ya operativa: 4-8 semanas de desarrollo\n• Coste de conexión: definido por modelo comercial de ISBE (nodo participante)\n• Primera demo a cliente: en semanas, no en meses\n• Red de participantes ya existente: el cliente final accede a un ecosistema, no a una red vacía\n\nArgumento para el socio de la consultora: ISBE no compite con vuestra propuesta de valor — la amplía. Vosotros aportáis el conocimiento sectorial y la integración; ISBE aporta la infraestructura de confianza que hace que vuestra solución sea creíble ante el cliente final."
+      },
+      {
+        q:"Escribe el executive summary en inglés para el VP of Digital Transformation. Máximo tres párrafos, sin jerga técnica, centrado en el problema de negocio",
+        a:"Executive Summary — ISBE Proposal for [Company Name]\n\nYour supply chain today relies on each participant trusting the others' records. When a dispute arises — or when a regulator asks for proof — there is no neutral, tamper-proof source of truth. Audits are slow, expensive, and dependent on manual document collection across multiple parties who use different systems.\n\nISBE provides a shared infrastructure where every event in your value chain — origin, transformation, custody transfer, delivery — is recorded once, by the party who knows it best, and made verifiable to all authorised participants instantly. No central authority controls the data. Every organisation keeps full ownership of what it contributes.\n\nThe immediate business impact: faster compliance reporting, lower audit costs, and a verifiable record that holds up in commercial disputes and regulatory reviews. The strategic impact: a foundation that positions [Company Name] to meet the EU's tightening traceability requirements — EUDR, CSRD, and others — without rebuilding your processes each time the regulation changes."
+      },
+    ]
+  },
+  {
+    num:"05",label:"Negociación\ny cierre",color:"#993C1D",
+    badge:"Cierre",badgeBg:"#FAECE7",badgeCol:"#993C1D",
+    title:"Negociación con múltiples stakeholders y cierre del deal",
+    sub:"En deals B2B con empresas medianas y grandes hay que gestionar en paralelo al CIO interesado, a Legal con preguntas sobre GDPR, al CTO con dudas de integración y al CFO evaluando el ROI. El CRM es el cerebro que evita que algo se pierda en el momento crítico.",
+    tools:[
+      {chip:"HubSpot MCP",type:"mcp",desc:"Claude revisa el pipeline cada mañana, identifica deals con tareas vencidas o sin actividad reciente y genera el briefing de seguimiento del día. También actualiza etapas, registra objeciones como notas y actualiza el forecast sin abrir el CRM."},
+      {chip:"Signaturit / DocuSign",type:"manual",desc:"Firma electrónica del contrato con validez jurídica bajo eIDAS en España y la UE. Genera un audit trail completo (quién firmó, cuándo, desde qué dispositivo) vinculado al Deal en HubSpot."},
+      {chip:"HubSpot Meetings",type:"manual",desc:"Enlace de calendario en los emails de seguimiento para que el cliente reserve sin intercambios de mensajes. Reduce la fricción logística en la fase más crítica del deal."},
+    ],
+    storage:"Al cerrar, el Deal se marca Won en HubSpot con ARR final, fecha real, vertical, argumento decisivo y canal de entrada. Datos que alimentan el reporte mensual al Executive Director y muestran qué segmentos y argumentos funcionan mejor.",
+    storageRef:"HubSpot Deal Won → ARR, fecha, vertical, motivo de cierre → reporte al Executive Director",
+    flow:["HubSpot MCP briefing diario","→","Objeciones registradas","→","Stakeholders alineados","→","Signaturit firma","→","Deal Won en HubSpot"],
+    ai:[
+      {
+        q:"Legal pide garantías de cumplimiento GDPR en la red permisionada de ISBE. Los cinco puntos técnicos y jurídicos clave para resolver sus dudas sin abogado externo en la reunión",
+        a:"Cinco puntos para la reunión con Legal:\n\n1. No hay datos personales en la cadena de bloques. ISBE registra hashes criptográficos y referencias a documentos — nunca el documento en sí ni datos personales directos. Esto es coherente con el principio de minimización de datos del GDPR (Art. 5.1.c).\n\n2. El responsable del tratamiento sigue siendo vuestra organización. ISBE actúa como infraestructura, no como responsable ni encargado del tratamiento de vuestros datos. Esto se establece explícitamente en el contrato de adhesión a la red.\n\n3. Derecho al olvido: compatible por diseño. Como los datos personales no están en la cadena, eliminarlos de vuestros sistemas cumple con el Art. 17 sin conflicto con la inmutabilidad del registro.\n\n4. Transferencias internacionales: ISBE opera en infraestructura dentro de la UE. No hay transferencia de datos a terceros países ni a jurisdicciones sin decisión de adecuación.\n\n5. Existe documentación formal de cumplimiento. Alastria como entidad gestora de ISBE tiene elaborado el análisis de impacto (DPIA) de la red y puede facilitarlo para revisión del DPO antes de la firma."
+      },
+      {
+        q:"El CFO quiere reducir el compromiso inicial. Propón tres estructuras alternativas (piloto de pago, éxito compartido, entrada por fases) manteniendo el ARR objetivo a 12 meses",
+        a:"Tres estructuras para presentar al CFO:\n\nOpción 1 — Piloto de pago (3 meses):\nComienza con un alcance acotado (un caso de uso, un segmento de la cadena) a €18.000. Si los KPIs acordados se cumplen, conversión automática a contrato anual a precio preferente (descuento del 15% sobre tarifa estándar). El riesgo inicial es bajo; el ARR objetivo se alcanza en el mes 4.\n\nOpción 2 — Entrada por fases:\nFase 1 (meses 1-3): integración técnica y primer caso de uso → €25.000. Fase 2 (meses 4-12): expansión a casos adicionales y más participantes de la red → €55.000. Total año 1: €80.000. Misma inversión, pagada en dos momentos que coinciden con sus ciclos de aprobación presupuestaria.\n\nOpción 3 — Fee base reducido + variable por uso:\nFee fijo mensual reducido (€2.500/mes) que cubre la conexión a la red y el soporte, más un componente variable por volumen de transacciones registradas. Para empresas con incertidumbre sobre el volumen inicial, esto alinea el coste con el valor generado. Con el volumen proyectado, el ARR resultante es comparable."
+      },
+      {
+        q:"Resume el historial de este deal y genera el briefing para la reunión de cierre: qué hemos acordado, qué queda pendiente y cuál es el siguiente paso concreto",
+        a:"Briefing reunión de cierre — Agencia Tributaria (15 enero):\n\nHistorial en 3 líneas: Primer contacto en octubre vía evento eGovForum. Discovery en noviembre confirmó el caso de uso (identidad digital fiscal para notificaciones electrónicas). Propuesta enviada el 2 de diciembre, abierta 4 veces, con tiempo alto en la diapositiva de arquitectura técnica y en la de precios.\n\nAcordado hasta ahora:\n✓ Caso de uso: credenciales verificables para identificación en sede electrónica\n✓ Alcance técnico: piloto con 500 funcionarios, integración con Cl@ve\n✓ Plazo: puesta en producción antes de Q2 2025\n✓ Presupuesto aprobado internamente: hasta €120.000\n\nPendiente de acordar en esta reunión:\n→ Modelo de gobierno de datos (quién es responsable del tratamiento en el piloto)\n→ Cláusula de confidencialidad sobre la arquitectura del sistema\n→ Fecha de firma y hito de arranque\n\nObjetivo de salida: acuerdo verbal sobre los tres puntos pendientes y fecha concreta para la firma del contrato. Si sale bien, firma digital vía Signaturit antes del viernes."
+      },
+    ]
+  },
+  {
+    num:"06",label:"Ecosistema\ny partners",color:"#3C3489",
+    badge:"Ecosistema",badgeBg:"#EEEDFE",badgeCol:"#3C3489",
+    title:"Construcción del canal indirecto y del ecosistema de partners",
+    sub:"Un integrador con 30 clientes del sector puede introducir ISBE en todas esas conversaciones de golpe. El canal no es un complemento al pipeline directo: es una palanca de multiplicación que hay que construir en paralelo desde el primer día.",
+    tools:[
+      {chip:"HubSpot MCP",type:"mcp",desc:"Claude gestiona el pipeline de partners (separado del directo) actualizando etapas, registrando el revenue atribuido por canal y generando el reporte de estado de cada relación de co-venta sin necesidad de abrir el CRM."},
+      {chip:"Notion MCP",type:"mcp",desc:"Claude lee el partner playbook del tipo de partner relevante antes de cada reunión, y actualiza la página del partner con nuevos aprendizajes sobre cómo funciona mejor la co-venta tras cada interacción."},
+      {chip:"Brave Search MCP",type:"mcp",desc:"Claude identifica en tiempo real los eventos europeos de DLT, regulación financiera e identidad digital del próximo semestre y genera la lista de prioridad con justificación para cada uno."},
+      {chip:"LinkedIn + eventos presenciales",type:"manual",desc:"Presencia en persona en European Blockchain Forum, DLT Camp y foros de la Comisión Europea. Un contacto hecho en un evento convierte en partner mucho más rápido que un email frío."},
+    ],
+    storage:"Cada partner tiene su pipeline propio en HubSpot con historial de cuentas introducidas y revenue atribuido, medido separado del pipeline directo. El partner playbook en Notion se actualiza continuamente con aprendizajes de co-venta.",
+    storageRef:"HubSpot Partner Pipeline → revenue atribuido por canal + Notion Partner Playbook actualizado",
+    flow:["Brave MCP identifica eventos","→","LinkedIn intro warm","→","Notion MCP lee playbook","→","HubSpot MCP actualiza partner","→","Revenue canal atribuido"],
+    ai:[
+      {
+        q:"Identifica los diez integradores SAP en España con más probabilidad de ser socios de canal de ISBE, considerando base de clientes regulados y experiencia en transformación digital",
+        a:"Top 10 integradores SAP en España — potencial de canal ISBE:\n\n1. NTT DATA España — base de clientes en banca, AAPP y utilities; práctica activa de blockchain enterprise; ya participan en proyectos Alastria.\n2. Accenture España — cliente SAP en grandes corporaciones reguladas; tienen práctica de identidad digital y proyectos eIDAS 2 activos.\n3. Capgemini España — fuerte en sector público y energía; han presentado casos de trazabilidad en supply chain en foros europeos.\n4. Indra — histórico en AAPP y defensa; su división Minsait tiene práctica DLT con varios proyectos en la administración española.\n5. Atos España — contratos marco con la Administración General del Estado; interés declarado en identidad digital soberana.\n6. Deloitte Tech Spain — práctica de blockchain en banca y seguros; varios socios con contactos directos en la red Alastria.\n7. IBM España — integrador SAP con práctica Hyperledger; clientes en banca y logística que son ICP directo de ISBE.\n8. PwC Tech — consultoría regulatoria + implementación; perfil ideal para deals donde Legal y Compliance son los decisores.\n9. Softtek España — especialización en manufactura y logística; clientes industriales con necesidades de trazabilidad bajo CSRD.\n10. Seidor — fuerte en PYME industrial y distribución; canal para ISBE en segmento medio donde el deal directo no es eficiente.\n\nPrioridad inmediata: NTT DATA, Indra y Deloitte — contactos calientes ya identificados en la red Alastria."
+      },
+      {
+        q:"Lee el partner playbook de consultoras en Notion y genera el partner brief de una página para la primera reunión con una consultora de transformación digital",
+        a:"Partner Brief — Propuesta de co-venta ISBE × [Consultora]\n\n¿Qué es ISBE?\nInfraestructura blockchain permisionada promovida por la Comunidad de Madrid e implementada por Alastria. Casos de uso: tokenización de activos, trazabilidad en supply chain e identidad digital conforme a eIDAS 2. Red operativa con participantes activos en banca, energía, AAPP y logística.\n\n¿Por qué tiene sentido para vosotros?\nVuestros clientes en sectores regulados ya están recibiendo presión para resolver trazabilidad, KYC portátil y certificación documental. ISBE es la capa de infraestructura sobre la que podéis construir esa propuesta sin necesitar desarrollar blockchain internamente. Vosotros aportáis el conocimiento sectorial y la integración; ISBE aporta la red de confianza que hace creíble la solución ante el cliente final.\n\nModelo de co-venta propuesto:\n• Vosotros identificáis la oportunidad y hacéis la intro al cliente\n• Reunión conjunta de discovery (ISBE + vosotros)\n• Propuesta firmada por las dos partes\n• Reparto de valor: a definir según el deal, orientativo 70/30 integración/infraestructura\n\nPróximo paso: identificar juntos 3 cuentas de vuestra cartera donde el caso de uso encaje y hacer una primera reunión de exploración antes de fin de mes."
+      },
+      {
+        q:"¿Qué eventos europeos de DLT, regulación financiera e identidad digital debo priorizar en los próximos seis meses para generar pipeline de partners?",
+        a:"Calendario de eventos prioritarios — próximos 6 meses:\n\n🔵 Tier 1 — Imprescindibles:\n• European Blockchain Forum (Bruselas, febrero) — el evento institucional de referencia de la Comisión Europea; presencia de decisores de política DLT y actores del ecosistema europeo. Ideal para relaciones con fondos y organismos UE.\n• Identity Week Europe (Ámsterdam, junio) — el mayor evento de identidad digital del continente; concentra a los actores clave de eIDAS 2, tanto del lado tecnológico como regulatorio.\n\n🟣 Tier 2 — Alta prioridad:\n• DLT Camp (Madrid, marzo) — evento de la comunidad Alastria; ya tenemos presencia, pero es el lugar para consolidar relaciones con integradores y hacer warm introductions a potenciales partners.\n• FinTech Forum Frankfurt (abril) — acceso a banca corporativa alemana y fondos de inversión en DLT; útil para el eje de tokenización.\n\n🟡 Tier 3 — Seguimiento:\n• Smart City Expo (Barcelona, noviembre) — AAPP como ICP; presencia útil si tenemos casos de uso en ciudad inteligente o identidad ciudadana avanzados para ese momento.\n• MWC Barcelona (marzo) — relevante solo si el caso de identidad digital con telcos está activo en pipeline."
+      },
+    ]
+  },
+];
+let curPhase=0;
+
+function renderPhases(){
+  document.getElementById("phase-strip").innerHTML=PHASES.map((p,i)=>`
+    <button class="phase-btn${i===curPhase?" active":""}" style="${i===curPhase?"--active-c:"+p.color:""}" onclick="selectPhase(${i})">
+      <div class="ph-dot"></div>
+      <div class="ph-num">${p.num}</div>
+      <div class="ph-label">${p.label}</div>
+    </button>`).join("");
+}
+
+function renderDetail(){
+  const p=PHASES[curPhase];
+  const mcpTools=p.tools.filter(t=>t.type==="mcp");
+  const manualTools=p.tools.filter(t=>t.type==="manual");
+  const toolGroup=(tools,type)=>tools.map(t=>`
+    <div class="tool-item">
+      <span class="tool-chip tool-chip-${type}">${t.chip}</span>
+      <span class="tool-desc">${t.desc}</span>
+    </div>`).join("");
+  const toolsHtml=`
+    <div class="tool-group">
+      <div class="tool-group-hd tool-group-mcp">Vía MCP</div>
+      ${toolGroup(mcpTools,"mcp")}
+    </div>
+    <div class="tool-group" style="margin-top:1rem">
+      <div class="tool-group-hd tool-group-manual">Manual</div>
+      ${toolGroup(manualTools,"manual")}
+    </div>`;
+  const mcpNames=new Set(p.tools.filter(t=>t.type==="mcp").map(t=>t.chip.toLowerCase()));
+  const flow=p.flow.map(n=>{
+    if(n==="→") return `<span class="flow-arr">→</span>`;
+    const low=n.toLowerCase();
+    const isMcp=[...mcpNames].some(m=>low.includes(m.split(" ")[0].toLowerCase()));
+    const cls=isMcp?"mcp":"manual";
+    return `<span class="flow-node ${cls}">${n}</span>`;
+  }).join("");
+  const ais=p.ai.map((item,idx)=>`
+    <div class="ai-prompt" onclick="showResponse(${curPhase},${idx})">
+      <span class="ai-arrow">↗</span><span>${item.q}</span>
+    </div>`).join("");
+  document.getElementById("detail-card").style.setProperty("--active-c",p.color);
+  document.getElementById("detail-card").innerHTML=`
+    <div class="dc-header">
+      <div>
+        <div class="dc-title">${p.title}</div>
+        <div class="dc-sub">${p.sub}</div>
+      </div>
+      <span class="dc-badge" style="background:${p.badgeBg};color:${p.badgeCol}">${p.badge}</span>
+    </div>
+    <div class="dc-rows-wrap">
+      <div class="dc-row">
+        <div class="row-hd">Herramientas</div>
+        <div class="tools-list">${toolsHtml}</div>
+      </div>
+      <div class="dc-row">
+        <div class="row-hd">Dónde vive el dato</div>
+        <div class="storage-block">
+          <div class="storage-title">Qué se registra y para qué sirve</div>
+          <div class="storage-text">${p.storage}</div>
+          <div class="storage-ref">${p.storageRef}</div>
+        </div>
+      </div>
+    </div>
+    <div class="dc-flow">
+      <div class="flow-lbl">Flujo de datos en esta fase</div>
+      ${flow}
+    </div>
+    <div class="dc-ai">
+      <div class="ai-hd">Prompts reales — haz clic para ver la respuesta</div>
+      <div class="ai-prompts">${ais}</div>
+      <div class="ai-chat" id="ai-chat" style="display:none">
+        <div class="ai-chat-msgs" id="ai-chat-msgs"></div>
+      </div>
+    </div>`;
+}
+
+function showResponse(phaseIdx, promptIdx){
+  const item=PHASES[phaseIdx].ai[promptIdx];
+  const chat=document.getElementById("ai-chat");
+  const msgs=document.getElementById("ai-chat-msgs");
+  document.querySelectorAll(".ai-prompt").forEach((el,i)=>{
+    el.classList.toggle("ai-prompt-active", i===promptIdx);
+  });
+  const userDiv=document.createElement("div");
+  userDiv.className="sim-msg sim-user";
+  userDiv.textContent=item.q;
+  const aiDiv=document.createElement("div");
+  aiDiv.className="sim-msg sim-ai";
+  aiDiv.innerHTML=item.a.split("\n").join("<br>");
+  msgs.innerHTML="";
+  msgs.appendChild(userDiv);
+  msgs.appendChild(aiDiv);
+  chat.style.display="block";
+  chat.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function selectPhase(i){curPhase=i;renderPhases();renderDetail()}
+renderPhases();renderDetail();
+
+const CASES=[
+  {
+    id:"tokenizacion",
+    icon:"◈",iconBg:"#FAEEDA",iconCol:"#854F0B",color:"#854F0B",
+    name:"Tokenización de activos reales",
+    desc:"Empresas que quieren representar activos físicos o financieros en una red de confianza con trazabilidad total y cumplimiento regulatorio desde el diseño.",
+    icp:["Banca","Fintech","Inmobiliario","Energía","Fondos"],
+    problem:"Tokenizar activos en una blockchain pública como Ethereum crea problemas reales para empresas en sectores regulados: cualquiera puede ver las transacciones, no hay control sobre quién participa en la red y cumplir con MiCA o GDPR se vuelve complejo. Las empresas necesitan una infraestructura donde solo los participantes autorizados puedan operar y donde los datos queden bajo su propio control.",
+    pitch:"ISBE ofrece la capa de infraestructura sobre la que tokenizar activos con cumplimiento nativo de MiCA, acceso restringido a participantes verificados, soberanía de datos y contratos inteligentes para automatizar liquidación y distribución de rendimientos, sin necesidad de construir esa infraestructura desde cero.",
+    steps:[
+      "Identificar empresas con proyectos piloto de tokenización anunciados pero todavía no lanzados",
+      "Decisores objetivo: CIO, Head of Innovation y equipo Legal/Compliance",
+      "Argumento diferencial: cumplimiento MiCA nativo, privacidad garantizada y sin coste de construir infraestructura propia",
+      "Segunda reunión con el equipo técnico de ISBE para validar el caso de uso concreto",
+      "Propuesta de piloto acotado de 3 meses sobre un tipo de activo o segmento específico",
+    ],
+    system:`Eres experto en desarrollo de negocio de ISBE (Infraestructura de Servicios Blockchain de España) para tokenización de activos reales. ISBE es una red permisionada promovida por la Comunidad de Madrid e implementada por Alastria, diseñada para entornos empresariales e institucionales regulados.
+
+Para tokenización, ISBE ofrece: red permisionada donde solo participantes verificados pueden operar (cumplimiento nativo con MiCA y GDPR); contratos inteligentes para automatizar liquidación y distribución de rendimientos; soberanía de datos (el emisor controla quién puede ver qué); sin necesidad de construir la infraestructura de red desde cero.
+
+Responde como BD Lead hablando con un CIO, Head of Innovation o equipo Legal. Argumentos de negocio (ROI, reducción de riesgo regulatorio, tiempo hasta mercado), no argumentos técnicos de blockchain. Máximo 4 frases.`,
+    qs:[
+      {q:"¿En qué se diferencia ISBE de usar Ethereum o Polygon para tokenizar?",
+       a:"La diferencia fundamental es de modelo de acceso y gobernanza. Ethereum y Polygon son redes públicas: cualquiera puede leer las transacciones, cualquiera puede participar como validador. Eso es incompatible con sectores regulados donde la confidencialidad de las operaciones es un requisito legal, no una preferencia.\n\nISBE es una red permisionada: solo los participantes autorizados y verificados pueden operar en ella. La gobernanza es consortial — ninguna empresa tiene control unilateral — y la infraestructura cumple con GDPR y MiCA desde el diseño. Para una empresa que necesita tokenizar activos financieros o inmobiliarios, eso no es un detalle técnico: es la diferencia entre una solución que puede pasar por el equipo Legal y una que no puede."},
+      {q:"¿Qué necesita nuestra empresa para lanzar un piloto con ISBE?",
+       a:"Tres cosas básicas para arrancar un piloto en 4-8 semanas:\n\n1. Definir el caso de uso concreto: qué activo se tokeniza, quién emite, quién puede ver qué. No hace falta resolver todo el roadmap — el piloto sirve precisamente para validar el modelo antes de escalar.\n\n2. Un punto de contacto técnico interno que pueda trabajar con las APIs REST de ISBE. No se necesita experiencia previa en blockchain — la integración es estándar y el equipo técnico de ISBE acompaña el proceso.\n\n3. Alineación entre el área de innovación o digital y el equipo Legal/Compliance. El piloto puede arrancar en un entorno controlado, pero cuanto antes Legal revise la arquitectura de privacidad, más fluida es la expansión posterior.\n\nEl coste y el tiempo de puesta en marcha del piloto los definimos juntos según el alcance. La mayoría de los primeros pilotos en ISBE han estado en producción en menos de 2 meses desde la firma."},
+      {q:"¿Cómo se cumple la regulación MiCA con una red permisionada?",
+       a:"MiCA (Markets in Crypto-Assets) regula la emisión y los servicios sobre criptoactivos en la UE. Para la tokenización de activos sobre ISBE, hay tres puntos clave de cumplimiento:\n\nAcceso controlado: MiCA exige que los emisores de tokens de activos (ARTs) y de dinero electrónico (EMTs) estén autorizados y sean identificables. Una red permisionada como ISBE garantiza por diseño que solo participantes verificados pueden emitir o transferir tokens — esto es un requisito de MiCA, no una restricción adicional.\n\nTransparencia selectiva: MiCA obliga a publicar whitepaper para ciertos tipos de tokens, pero no exige que todas las transacciones sean públicas. ISBE permite configurar qué información es visible para qué participantes, manteniendo el cumplimiento de transparencia hacia el regulador sin exponer datos comerciales sensibles.\n\nInforme al regulador: ISBE puede generar el audit trail que los supervisores (CNMV, BCE) pueden requerir en cualquier momento, sin necesidad de reconstruir el historial manualmente."}
+    ]
+  },
+  {
+    id:"trazabilidad",
+    icon:"⬡",iconBg:"#E1F5EE",iconCol:"#0F6E56",color:"#0F6E56",
+    name:"Trazabilidad en supply chain",
+    desc:"Empresas con cadenas de valor multi-actor que necesitan un registro neutro, verificable y jurídicamente válido del origen y custodia de sus productos o documentos.",
+    icp:["Logística","Farmacéutico","Alimentación","Automoción","Aduanas"],
+    problem:"Las cadenas de suministro involucran fabricantes, transportistas, almacenes y distribuidores, cada uno con sus propios sistemas. Cuando surge un problema (un recall, una disputa de custodia, una auditoría) no existe un registro neutral en el que todos los actores confíen. Los registros en papel o en hojas de cálculo no tienen suficiente validez jurídica y los sistemas propietarios de cada actor no son accesibles para los demás.",
+    pitch:"ISBE crea un registro compartido e inmutable al que todos los actores de la cadena pueden escribir y leer según sus permisos, sin que ninguno tenga que confiar en los sistemas del otro. Cada evento (origen, transformación, cambio de custodia, entrega) queda registrado con timestamp y firma digital con validez jurídica.",
+    steps:[
+      "Identificar empresas con problemas recientes de compliance documental, recall o auditorías complejas",
+      "Decisores objetivo: COO, Director de Operaciones, responsable de Calidad o Compliance",
+      "Argumento principal: evidencia jurídica válida en auditorías y litigios, reducción del coste de certificación",
+      "Canal: conectar con el integrador de ERP que ya trabaja con esa empresa para co-venta",
+      "Piloto sobre un segmento acotado: documentos de exportación o lotes de un producto concreto",
+    ],
+    system:`Eres experto en desarrollo de negocio de ISBE para trazabilidad en supply chain. ISBE es una red permisionada promovida por la Comunidad de Madrid e implementada por Alastria.
+
+Para trazabilidad, ISBE ofrece: registro compartido e inmutable al que pueden escribir todos los actores de la cadena con sus permisos correspondientes; cada evento firmado digitalmente con timestamp, con validez como evidencia jurídica; integración con ERP y sistemas existentes mediante APIs REST sin reemplazar la infraestructura actual; cumplimiento con regulaciones como EUDR, CSRD, trazabilidad farmacéutica y documentación aduanera; cada actor ve solo lo que le corresponde según sus permisos.
+
+Responde como BD Lead hablando con un COO o Director de Operaciones. Argumentos operativos y de negocio, no técnicos de blockchain. Máximo 4 frases.`,
+    qs:[
+      {q:"¿Cómo se integra ISBE con nuestro ERP sin reemplazarlo?",
+       a:"ISBE se conecta mediante APIs REST estándar. El flujo es el siguiente: cuando un evento relevante ocurre en vuestro ERP (un lote sale de almacén, un documento se valida, una mercancía cambia de custodia), vuestro sistema envía una llamada a la API de ISBE que registra ese evento en la red con timestamp y firma digital. El ERP sigue siendo el sistema de gestión interno; ISBE es la capa de certificación compartida con el resto de la cadena.\n\nNo se migran datos al ERP ni se reemplaza ningún proceso. La integración típica requiere entre 2 y 6 semanas de desarrollo dependiendo del ERP (SAP, Oracle, Microsoft Dynamics) y del número de eventos que se quieran registrar. El equipo técnico de ISBE tiene documentación específica para los principales ERPs del mercado."},
+      {q:"¿Qué pasa si uno de mis proveedores no quiere unirse a la red?",
+       a:"Es la pregunta más frecuente y tiene respuesta práctica. Hay dos enfoques según el caso:\n\nSi el proveedor es pequeño o tiene baja capacidad técnica: ISBE permite que un participante de la red registre eventos en nombre de otro mediante un modelo de delegación. Vosotros podéis registrar los eventos del proveedor a partir de la documentación que él os entrega — sin que el proveedor tenga que integrarse técnicamente. Esto funciona para la mayoría de proveedores de últimas fases de la cadena.\n\nSi el proveedor es un actor clave y su resistencia es estratégica: en la práctica, cuando el cliente final o el comprador exige trazabilidad verificable como condición comercial, el proveedor se incorpora. Hemos visto este patrón repetirse en logística y alimentación. La negociación es comercial, no técnica.\n\nEn todo caso, el sistema funciona con cobertura parcial de la cadena — no es todo o nada. Se empieza donde hay más valor y se va expandiendo."},
+      {q:"¿Cómo ayuda esto a cumplir con la regulación EUDR de la UE?",
+       a:"El Reglamento EUDR (Deforestación) exige que las empresas que comercializan ciertos productos (madera, soja, cacao, café, aceite de palma, ganado, caucho) en la UE puedan demostrar que no proceden de zonas deforestadas después de diciembre de 2020. La demostración requiere geolocalización de origen y un audit trail de la cadena de custodia completa.\n\nISBE resuelve el problema de la evidencia: cada actor de la cadena registra su evento (origen, transformación, transporte, importación) en la red con su firma digital. El resultado es un registro inmutable y verificable que el operador puede presentar ante la Agencia Tributaria o el regulador sin reconstruir el historial manualmente ni depender de que todos los proveedores usen el mismo sistema documental.\n\nAdicional: el registro en ISBE tiene validez jurídica como evidencia, lo que protege al operador en caso de inspección o litigio sobre el origen de los productos."}
+    ]
+  },
+  {
+    id:"identidad",
+    icon:"◉",iconBg:"#E6F1FB",iconCol:"#185FA5",color:"#185FA5",
+    name:"Identidad digital y credenciales verificables",
+    desc:"Organizaciones que necesitan verificar identidades de personas o empresas de forma segura, portable y conforme al marco europeo eIDAS 2.",
+    icp:["Banca","Seguros","AAPP","Telco","Plataformas digitales"],
+    problem:"Hoy cada empresa hace su propio proceso de KYC desde cero: el usuario sube sus documentos, la empresa los verifica, y ese proceso se repite cada vez que el usuario contrata un servicio nuevo. El coste es alto, la experiencia del usuario es mala y los datos personales se replican en múltiples sistemas. Con eIDAS 2, la UE está estableciendo el marco para wallets de identidad reutilizables, y las empresas necesitan infraestructura para emitir y verificar credenciales en ese estándar.",
+    pitch:"ISBE actúa como infraestructura de confianza sobre la que emitir y verificar credenciales digitales verificables (VCs) conformes a eIDAS 2. El usuario hace el KYC una vez y puede reutilizar esa credencial verificada en cualquier servicio que opere sobre ISBE, sin que ningún actor centralizado —ni ISBE— custodie sus datos personales.",
+    steps:[
+      "Target prioritario: entidades con procesos de KYC manual o con proveedores SaaS caros que quieren reducir ese coste",
+      "Decisores objetivo: CISO, DPO, Director de Transformación Digital, Head of Compliance",
+      "Argumento principal: eIDAS 2 como obligación regulatoria con fecha de entrada en vigor que crea urgencia real",
+      "Canal: conectar con integradores de identidad digital que necesitan la capa de red para sus soluciones",
+      "Propuesta de entrada: emitir credenciales para un caso de uso interno primero (empleados o clientes piloto)",
+    ],
+    system:`Eres experto en desarrollo de negocio de ISBE para identidad digital, credenciales verificables y KYC/KYB descentralizado bajo eIDAS 2. ISBE es una red permisionada promovida por la Comunidad de Madrid e implementada por Alastria.
+
+Para identidad digital, ISBE ofrece: infraestructura de confianza para emitir y verificar credenciales digitales conformes a eIDAS 2; credenciales verificables (VCs) que permiten demostrar atributos (identidad, cualificaciones, permisos) sin exponer datos innecesarios; KYC portátil: el proceso se hace una vez y el usuario reutiliza la credencial en múltiples servicios; privacidad por diseño: ni ISBE ni ningún tercero custodia los datos personales; cumplimiento con GDPR, directiva AML y eIDAS 2.
+
+Responde como BD Lead hablando con un CISO, DPO o Director de Compliance. Argumentos de cumplimiento regulatorio, reducción de coste de KYC y mejora de experiencia de usuario. Máximo 4 frases.`,
+    qs:[
+      {q:"¿En qué se diferencia esto de un proveedor de identidad como Okta o Azure AD?",
+       a:"Okta y Azure AD son proveedores de gestión de identidad centralizados: ellos custodian las credenciales, ellos verifican la autenticación y, si su servicio falla o cambia sus condiciones, vuestros usuarios no pueden autenticarse.\n\nISBE con credenciales verificables (eIDAS 2) funciona de forma diferente: la credencial se emite una vez y vive en el wallet del usuario, no en un servidor central. Para verificar la identidad de un usuario, simplemente se comprueba que su credencial fue emitida por un emisor de confianza en la red — sin consultar a ningún tercero en tiempo real.\n\nPara el usuario: hace el KYC una vez y reutiliza la credencial en cualquier servicio del ecosistema sin repetir el proceso. Para la empresa: reduce el coste de onboarding y elimina la dependencia de un proveedor SaaS para el flujo de autenticación crítico. La diferencia de fondo es soberanía: el dato de identidad pertenece al usuario, no al proveedor."},
+      {q:"¿Cuándo entra en vigor la obligación de eIDAS 2 para empresas como la nuestra?",
+       a:"El Reglamento eIDAS 2 (UE 2024/1183) entró en vigor en mayo de 2024. Las fechas clave para empresas:\n\nSeptiembre 2025: los Estados miembro deben tener disponible la European Digital Identity Wallet para ciudadanos. Las empresas que presten servicios online con autenticación deben estar preparadas para aceptar wallets eIDAS 2 desde ese momento.\n\nObligación de aceptación: los servicios que hoy exigen identificación fuerte (banca, telecomunicaciones, administración pública, plataformas con más de 50M de usuarios en la UE) estarán obligados a aceptar la wallet eIDAS 2 como método de autenticación. No es opcional para los sectores regulados.\n\nVentana de oportunidad ahora: las empresas que construyan su infraestructura de emisión y verificación de credenciales antes de la fecha límite tendrán ventaja competitiva — y evitarán la presión de adaptarse en el último momento con menos tiempo y más coste."},
+      {q:"¿Cómo garantiza ISBE que no almacena los datos personales de nuestros usuarios?",
+       a:"Por diseño del protocolo, no por política. Esto es importante porque una política puede cambiar; el protocolo no.\n\nEn ISBE con credenciales verificables, lo que se registra en la red es el hash criptográfico de la credencial emitida — un identificador matemático que permite verificar su autenticidad pero del que es imposible reconstruir los datos originales. Los datos personales del usuario (nombre, DNI, fecha de nacimiento...) nunca salen del wallet del propio usuario.\n\nCuando una empresa quiere verificar la identidad de un usuario, el proceso es: el usuario presenta su credencial desde su wallet, la empresa verifica criptográficamente que fue emitida por un emisor de confianza en ISBE, y la interacción termina. ISBE no participa en esa verificación en tiempo real y no registra qué usuario se autenticó en qué servicio.\n\nEsto cumple con el principio de minimización de datos del GDPR (Art. 5.1.c) y con el concepto de privacy by design que exige eIDAS 2 para los proveedores de wallets y emisores de credenciales."}
+    ]
+  },
+];
+
+let curCase=null,demoMessages=[];
+
+function renderCases(){
+  document.getElementById("cases-grid").innerHTML=CASES.map(c=>`
+    <div class="case-card${curCase===c.id?" active":""}" style="${curCase===c.id?"--active-c:"+c.color:""}" onclick="selectCase('${c.id}')">
+      <div class="case-top">
+        <div class="case-ico" style="background:${c.iconBg};color:${c.iconCol}">${c.icon}</div>
+        <div class="case-name">${c.name}</div>
+        <div class="case-desc">${c.desc}</div>
+      </div>
+      <div class="case-body">
+        <div class="case-section">
+          <div class="case-stitle">El problema que resuelve</div>
+          <div class="case-stext">${c.problem}</div>
+        </div>
+        <div class="case-section">
+          <div class="case-stitle">El pitch de ISBE</div>
+          <div class="case-stext">${c.pitch}</div>
+        </div>
+        <div class="case-section">
+          <div class="case-stitle">Cómo desarrollo este pipeline</div>
+          <ul class="case-steps">${c.steps.map(s=>`<li>${s}</li>`).join("")}</ul>
+        </div>
+        <div class="case-section">
+          <div class="case-stitle">Sectores objetivo</div>
+          <div class="case-icp">${c.icp.map(i=>`<span>${i}</span>`).join("")}</div>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+function selectCase(id){
+  curCase=id;renderCases();
+  const c=CASES.find(x=>x.id===id);
+  document.getElementById("demo-dot").style.background=c.color;
+  document.getElementById("demo-title").textContent=c.name;
+  document.getElementById("demo-msgs").innerHTML=`<div class="dmsg dmsg-sys">Haz clic en una de las preguntas para ver cómo respondería en una conversación de preparación antes de una reunión con este tipo de cliente.</div>`;
+  document.getElementById("q-chips").innerHTML=c.qs.map((item,i)=>`<span class="qchip" onclick="showDemoResponse('${id}',${i})">${item.q}</span>`).join("");
+}
+
+function showDemoResponse(caseId,idx){
+  const c=CASES.find(x=>x.id===caseId);
+  const item=c.qs[idx];
+  const msgs=document.getElementById("demo-msgs");
+  document.querySelectorAll(".qchip").forEach((el,i)=>el.classList.toggle("qchip-active",i===idx));
+  const sysDiv=document.createElement("div");
+  sysDiv.className="dmsg dmsg-sys";
+  sysDiv.style.fontSize="12px";
+  sysDiv.textContent="Simulación de respuesta — en producción conecta con la API de Anthropic";
+  const userDiv=document.createElement("div");
+  userDiv.className="dmsg dmsg-user";
+  userDiv.textContent=item.q;
+  const aiDiv=document.createElement("div");
+  aiDiv.className="dmsg dmsg-ai";
+  aiDiv.innerHTML=item.a.split("\n").join("<br>");
+  msgs.innerHTML="";
+  msgs.appendChild(sysDiv);
+  msgs.appendChild(userDiv);
+  msgs.appendChild(aiDiv);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function demoSend(){}
+  const inp=document.getElementById("demo-in");
+function addDemoMsg(text,role){
+  const el=document.getElementById("demo-msgs");
+  const d=document.createElement("div");
+  d.className="dmsg dmsg-"+role;
+  d.textContent=text;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+  return d;
+}
+function switchView(id,btn){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  btn.classList.add("active");
+}
+renderCases();
+
+/* ════ MCP ════ */
+const MCP_SERVERS=[
+  {
+    id:"hubspot",
+    name:"HubSpot MCP",
+    install:"npx @hubspot/mcp-server",
+    color:"#993C1D",bg:"#FAECE7",border:"rgba(153,60,29,0.2)",
+    what:"Servidor MCP oficial de HubSpot que expone las APIs de CRM como herramientas de Claude. Permite crear y actualizar Deals, Contacts y Companies, añadir notas, avanzar etapas del pipeline y consultar el forecast, todo desde una conversación en Claude Desktop sin abrir el CRM.",
+    tools:["Crear o actualizar un Deal con sus propiedades (valor, etapa, fecha de cierre)","Añadir una nota estructurada a un contacto o deal con el resumen de una reunión","Listar los deals en una etapa concreta o filtrar por propietario y fecha","Crear tareas de seguimiento vinculadas a un contacto con fecha de vencimiento","Consultar el pipeline completo y el forecast de cierre del mes"],
+    example:"Después de una discovery call, le digo a Claude: 'Actualiza el deal de CaixaBank Tech a etapa Discovery completado, añade esta nota con el resumen de la llamada y crea una tarea para enviar la propuesta antes del viernes.' Ejecuta las tres acciones en HubSpot sin que yo abra el navegador."
+  },
+  {
+    id:"notion",
+    name:"Notion MCP",
+    install:"npx @notionhq/notion-mcp-server",
+    color:"#1a1a18",bg:"#f4f3ef",border:"rgba(26,26,24,0.15)",
+    what:"Servidor MCP oficial de Notion que permite leer y escribir en bases de datos y páginas. En el contexto de BD, lo uso para consultar el partner playbook, actualizar plantillas de propuestas por vertical y registrar aprendizajes después de cada deal cerrado o perdido.",
+    tools:["Leer la página de partner playbook de un vertical concreto antes de una reunión","Crear una entrada nueva en la base de datos de propuestas con el resultado del deal","Buscar en el repositorio de propuestas anteriores del mismo sector","Actualizar la página de un partner con el estado actual de la relación comercial","Añadir una entrada al log de objeciones frecuentes con la respuesta que funcionó"],
+    example:"Antes de una reunión con una consultora de transformación digital, le digo a Claude: 'Dame el partner playbook para consultoras y las últimas tres propuestas que hicimos para empresas de ese sector.' Recibe el contexto sin buscar manualmente en Notion."
+  },
+  {
+    id:"gdrive",
+    name:"Google Drive MCP",
+    install:"npx @google/drive-mcp-server",
+    color:"#185FA5",bg:"#E6F1FB",border:"rgba(24,95,165,0.2)",
+    what:"Servidor MCP que conecta con Google Drive y Google Docs. Lo uso principalmente para acceder a grabaciones de llamadas transcritas, propuestas en formato Slides o Docs, y para crear nuevos documentos directamente desde Claude sin cambiar de herramienta.",
+    tools:["Buscar y leer la transcripción de una llamada almacenada en Drive","Crear un nuevo Google Doc con el borrador de una propuesta generada por Claude","Leer el contenido de un deck de propuesta existente para adaptarlo a otra cuenta","Buscar en Drive archivos relacionados con una empresa o contacto concreto","Crear una carpeta de cuenta nueva con la estructura estándar de documentos"],
+    example:"Tras terminar la transcripción de una discovery con Correos Digital, le digo a Claude: 'Lee la transcripción de la reunión de hoy en Drive, extrae los puntos clave y crea un Google Doc con el borrador de la propuesta usando el template de logística.' Lo hace sin que yo copie ni pegue nada."
+  },
+  {
+    id:"brave",
+    name:"Brave Search MCP",
+    install:"npx @modelcontextprotocol/server-brave-search",
+    color:"#534AB7",bg:"#EEEDFE",border:"rgba(83,74,183,0.2)",
+    what:"Servidor MCP que usa la API de Brave Search para hacer búsquedas web en tiempo real desde Claude. En el proceso de research de cuentas, lo uso para obtener noticias recientes de una empresa, buscar a sus decisores o identificar si han tenido actividad pública relacionada con digitalización, DLT o cumplimiento normativo.",
+    tools:["Buscar noticias recientes de una empresa objetivo y extraer señales de interés","Encontrar artículos o declaraciones públicas de un decisor concreto antes de contactarle","Investigar si una empresa ha anunciado proyectos de transformación digital o blockchain","Buscar los eventos recientes del sector en los que ha participado una cuenta objetivo","Identificar qué regulaciones están afectando activamente a un sector en este momento"],
+    example:"Antes de escribir el email de primer contacto a Iberdrola, le digo a Claude: 'Busca noticias de los últimos 3 meses de Iberdrola relacionadas con digitalización, CSRD o trazabilidad de emisiones.' Recibo el contexto para personalizar el mensaje en segundos."
+  },
+  {
+    id:"filesystem",
+    name:"Filesystem MCP",
+    install:"npx @modelcontextprotocol/server-filesystem",
+    color:"#0F6E56",bg:"#E1F5EE",border:"rgba(15,110,86,0.2)",
+    what:"Servidor MCP local que da a Claude acceso de lectura y escritura a una carpeta del sistema de archivos. Lo uso para mantener un directorio local con templates de emails por vertical, scripts de discovery, plantillas de propuesta y el log personal de aprendizajes, todo accesible desde Claude sin subir nada a la nube.",
+    tools:["Leer el template de email ABM del sector energético para personalizar el mensaje","Guardar el resumen de una reunión como archivo Markdown en la carpeta de la cuenta","Leer el script de discovery actualizado antes de una llamada de cualificación","Guardar un nuevo aprendizaje en el log de objeciones con la respuesta que funcionó","Acceder a la plantilla de propuesta por vertical y generar una versión adaptada"],
+    example:"Al preparar la llamada de cierre con Agencia Tributaria, le digo a Claude: 'Lee el script de cierre de la carpeta templates y el resumen de las últimas tres reuniones con esta cuenta.' Llega a la llamada con el contexto completo sin buscar en carpetas."
+  },
+];
+
+let curMcp=0;
+
+function renderMcpNav(){
+  document.getElementById("mcp-nav").innerHTML=MCP_SERVERS.map((s,i)=>`
+    <button class="mcp-btn${i===curMcp?" active":""}" style="${i===curMcp?"--mc:"+s.color+";--mb:"+s.bg+";--mbd:"+s.border:""}" onclick="selectMcp(${i})">
+      <span class="mcp-btn-name">${s.name}</span>
+    </button>`).join("");
+}
+
+function renderMcpDetail(){
+  const s=MCP_SERVERS[curMcp];
+  const tools=s.tools.map(t=>`<li>${t}</li>`).join("");
+  document.getElementById("mcp-detail").innerHTML=`
+    <div class="mcp-card">
+      <div class="mcp-card-header" style="background:${s.bg};border-bottom-color:${s.border}">
+        <div>
+          <div class="mcp-card-name" style="color:${s.color}">${s.name}</div>
+          <code class="mcp-install">$ ${s.install}</code>
+        </div>
+        <span class="mcp-tag" style="background:${s.bg};color:${s.color};border-color:${s.border}">Servidor local</span>
+      </div>
+      <div class="mcp-section">
+        <div class="mcp-section-hd">Qué hace y por qué lo uso en BD</div>
+        <div class="mcp-section-text">${s.what}</div>
+      </div>
+      <div class="mcp-section" style="border-top:1px solid var(--border)">
+        <div class="mcp-section-hd">Herramientas que expone a Claude</div>
+        <ul class="mcp-tools">${tools}</ul>
+      </div>
+      <div class="mcp-example" style="border-top:1px solid var(--border);border-left:3px solid ${s.color}">
+        <div class="mcp-section-hd" style="color:${s.color}">Ejemplo de uso real en el pipeline</div>
+        <div class="mcp-section-text">${s.example}</div>
+      </div>
+    </div>`;
+}
+
+function selectMcp(i){curMcp=i;renderMcpNav();renderMcpDetail();}
+
+document.addEventListener('DOMContentLoaded',()=>{renderMcpNav();renderMcpDetail();});
+</script>
+
+<style>
+.mcp-intro{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.mcp-intro-title{font-size:15px;font-weight:500;margin-bottom:.5rem}
+.mcp-intro-text{font-size:13.5px;color:var(--text2);line-height:1.65}
+.mcp-arch{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:1.25rem 1.5rem;margin-bottom:1.25rem;overflow-x:auto}
+.arch-diagram{display:flex;align-items:center;gap:0;width:100%}
+.arch-node{border:1px solid var(--border2);border-radius:10px;padding:.75rem 1rem;background:var(--surface2);text-align:center;flex-shrink:0}
+.arch-node-label{font-size:12px;font-weight:500;margin-bottom:3px}
+.arch-node-sub{font-size:11px;color:var(--text3)}
+.arch-node.claude{background:var(--purple-bg);border-color:var(--purple-border)}
+.arch-node.claude .arch-node-label{color:var(--purple)}
+.arch-connector{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:50px}
+.arch-line{width:100%;height:1px;background:var(--border2)}
+.arch-conn-label{font-size:10px;color:var(--text3);white-space:nowrap}
+.arch-servers{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.arch-server{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);white-space:nowrap}
+.arch-tools{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.arch-tool{font-size:11px;padding:3px 9px;border-radius:6px;background:var(--surface2);color:var(--text3);border:1px solid var(--border);white-space:nowrap}
+
+.mcp-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:1.25rem}
+.mcp-layout{display:grid;grid-template-columns:280px 1fr;gap:1.25rem;align-items:start}
+@media(max-width:700px){.mcp-layout{grid-template-columns:1fr}}
+.mcp-btn{border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;cursor:pointer;background:var(--surface);text-align:left;font-family:'Inter',sans-serif;transition:all .15s;display:flex;flex-direction:column;gap:5px}
+.mcp-btn:hover:not(.active){background:var(--surface2);border-color:var(--border2)}
+.mcp-btn.active{border-color:var(--mc,var(--purple));background:var(--mb,var(--purple-bg))}
+.mcp-btn-name{font-size:13px;font-weight:500;color:var(--text)}
+.mcp-btn.active .mcp-btn-name{color:var(--mc,var(--purple))}
+.mcp-btn-cmd{font-size:11px;color:var(--text3);font-family:monospace;background:var(--surface2);padding:2px 7px;border-radius:4px;border:1px solid var(--border)}
+.mcp-btn.active .mcp-btn-cmd{background:var(--surface);border-color:var(--mbd,var(--purple-border))}
+
+.mcp-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface)}
+.mcp-card-header{padding:1.1rem 1.4rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.mcp-card-name{font-size:15px;font-weight:500;margin-bottom:5px}
+.mcp-install{font-size:12px;font-family:monospace;color:var(--text2);background:rgba(0,0,0,0.04);padding:3px 8px;border-radius:4px;border:1px solid var(--border)}
+.mcp-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;border:1px solid}
+.mcp-section{padding:1.1rem 1.4rem}
+.mcp-section-hd{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);font-weight:500;margin-bottom:.65rem}
+.mcp-section-text{font-size:13px;color:var(--text2);line-height:1.65}
+.mcp-tools{list-style:none;display:flex;flex-direction:column;gap:7px}
+.mcp-tools li{font-size:13px;color:var(--text2);line-height:1.55;padding-left:1.1rem;position:relative}
+.mcp-tools li::before{content:"→";position:absolute;left:0;color:var(--text3);font-size:12px}
+.mcp-example{padding:1.1rem 1.4rem 1.1rem 1.3rem;margin:0}
+.mcp-claude-row{border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden;margin-bottom:1.25rem}
+.mcp-claude-header{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);background:var(--purple-bg);display:flex;align-items:center;gap:.75rem}
+.mcp-claude-dot{width:8px;height:8px;border-radius:50%;background:var(--purple)}
+.mcp-claude-title{font-size:13px;font-weight:500;color:var(--purple)}
+.mcp-claude-msgs{padding:1rem 1.2rem;min-height:180px;display:flex;flex-direction:column;gap:8px}
+.mcp-claude-input{border-top:1px solid var(--border);padding:.75rem 1.2rem;display:flex;gap:8px}
+.mcp-claude-input input{flex:1;border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;outline:none;transition:border-color .15s}
+.mcp-claude-input input:focus{border-color:var(--purple)}
+.mcp-claude-input input::placeholder{color:var(--text3)}
+.mcp-shortcuts{display:flex;flex-wrap:wrap;gap:6px;padding:.6rem 1.2rem;border-top:1px solid var(--border)}
+.mcp-shortcut{font-size:11.5px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;cursor:pointer;background:var(--surface);color:var(--text2);transition:all .15s;font-family:'Inter',sans-serif}
+.mcp-shortcut:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+.mcp-config{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);margin-top:1.25rem}
+.mcp-config-header{padding:.85rem 1.2rem;border-bottom:1px solid var(--border);background:var(--surface2);font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);font-weight:500;display:flex;align-items:center;gap:.5rem}
+.mcp-config-body{padding:1rem 1.2rem;font-family:monospace;font-size:12px;line-height:1.7;color:var(--text2);overflow-x:auto;white-space:pre}
+.tok-key{color:#185FA5}.tok-str{color:#0F6E56}.tok-num{color:#854F0B}.tok-brace{color:var(--text3)}
+</style>
+
+<div id="mcp" class="view">
+  <div class="mcp-intro">
+    <div class="mcp-intro-title">MCP local para el pipeline de BD — qué es y por qué lo uso</div>
+    <div class="mcp-intro-text">MCP (Model Context Protocol) es el protocolo abierto de Anthropic que permite conectar Claude con herramientas externas: CRM, sistemas de archivos, buscadores, bases de datos. Un servidor MCP es un proceso ligero que corre en local y expone un conjunto de herramientas que Claude puede invocar directamente durante una conversación. En el contexto de BD, esto significa que en lugar de abrir HubSpot, buscar el deal, copiar el contexto, ir a Claude, escribir el prompt y volver a HubSpot a pegar el resultado, todo ese flujo ocurre en una sola conversación. Los servidores que uso son todos públicos, con instalación por npx en menos de 5 minutos cada uno.</div>
+  </div>
+
+  <div class="mcp-arch">
+    <div class="section-label" style="margin-bottom:.9rem">Arquitectura — cómo se conecta todo</div>
+    <div class="arch-diagram">
+      <div class="arch-node claude">
+        <div class="arch-node-label">Claude Desktop</div>
+        <div class="arch-node-sub">Interfaz local</div>
+      </div>
+      <div class="arch-connector">
+        <div class="arch-line"></div>
+        <div class="arch-conn-label">MCP Protocol</div>
+      </div>
+      <div class="arch-servers">
+        <div class="arch-server" style="border-color:rgba(153,60,29,0.3);color:#993C1D">HubSpot MCP</div>
+        <div class="arch-server" style="border-color:rgba(26,26,24,0.2)">Notion MCP</div>
+        <div class="arch-server" style="border-color:rgba(24,95,165,0.3);color:#185FA5">Google Drive MCP</div>
+        <div class="arch-server" style="border-color:rgba(83,74,183,0.3);color:#534AB7">Brave Search MCP</div>
+        <div class="arch-server" style="border-color:rgba(15,110,86,0.3);color:#0F6E56">Filesystem MCP</div>
+      </div>
+      <div class="arch-connector">
+        <div class="arch-line"></div>
+        <div class="arch-conn-label">APIs / local</div>
+      </div>
+      <div class="arch-tools">
+        <div class="arch-tool">CRM · Deals · Contactos</div>
+        <div class="arch-tool">Playbooks · Plantillas</div>
+        <div class="arch-tool">Propuestas · Grabaciones</div>
+        <div class="arch-tool">Research · Noticias</div>
+        <div class="arch-tool">Templates locales</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Servidores instalados — selecciona uno para ver el detalle</div>
+  <div class="mcp-nav" id="mcp-nav"></div>
+  <div id="mcp-detail"></div>
+
+  <div class="mcp-config">
+    <div class="mcp-config-header">
+      <span>claude_desktop_config.json</span>
+      <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">— configuración completa para activar los 5 servidores</span>
+    </div>
+    <div class="mcp-config-body"><span class="tok-brace">{</span>
+  <span class="tok-key">"mcpServers"</span><span class="tok-brace">: {</span>
+    <span class="tok-key">"hubspot"</span><span class="tok-brace">: {</span>
+      <span class="tok-key">"command"</span><span class="tok-brace">:</span> <span class="tok-str">"npx"</span><span class="tok-brace">,</span>
+      <span class="tok-key">"args"</span><span class="tok-brace">: [</span><span class="tok-str">"-y"</span><span class="tok-brace">,</span> <span class="tok-str">"@hubspot/mcp-server"</span><span class="tok-brace">],</span>
+      <span class="tok-key">"env"</span><span class="tok-brace">: {</span> <span class="tok-key">"HUBSPOT_ACCESS_TOKEN"</span><span class="tok-brace">:</span> <span class="tok-str">"tu-token-privado-access"</span> <span class="tok-brace">}</span>
+    <span class="tok-brace">},</span>
+    <span class="tok-key">"notion"</span><span class="tok-brace">: {</span>
+      <span class="tok-key">"command"</span><span class="tok-brace">:</span> <span class="tok-str">"npx"</span><span class="tok-brace">,</span>
+      <span class="tok-key">"args"</span><span class="tok-brace">: [</span><span class="tok-str">"-y"</span><span class="tok-brace">,</span> <span class="tok-str">"@notionhq/notion-mcp-server"</span><span class="tok-brace">],</span>
+      <span class="tok-key">"env"</span><span class="tok-brace">: {</span> <span class="tok-key">"OPENAPI_MCP_HEADERS"</span><span class="tok-brace">:</span> <span class="tok-str">"{\"Authorization\":\"Bearer tu-notion-token\",\"Notion-Version\":\"2022-06-28\"}"</span> <span class="tok-brace">}</span>
+    <span class="tok-brace">},</span>
+    <span class="tok-key">"gdrive"</span><span class="tok-brace">: {</span>
+      <span class="tok-key">"command"</span><span class="tok-brace">:</span> <span class="tok-str">"npx"</span><span class="tok-brace">,</span>
+      <span class="tok-key">"args"</span><span class="tok-brace">: [</span><span class="tok-str">"-y"</span><span class="tok-brace">,</span> <span class="tok-str">"@google/drive-mcp-server"</span><span class="tok-brace">]</span>
+    <span class="tok-brace">},</span>
+    <span class="tok-key">"brave-search"</span><span class="tok-brace">: {</span>
+      <span class="tok-key">"command"</span><span class="tok-brace">:</span> <span class="tok-str">"npx"</span><span class="tok-brace">,</span>
+      <span class="tok-key">"args"</span><span class="tok-brace">: [</span><span class="tok-str">"-y"</span><span class="tok-brace">,</span> <span class="tok-str">"@modelcontextprotocol/server-brave-search"</span><span class="tok-brace">],</span>
+      <span class="tok-key">"env"</span><span class="tok-brace">: {</span> <span class="tok-key">"BRAVE_API_KEY"</span><span class="tok-brace">:</span> <span class="tok-str">"tu-brave-api-key"</span> <span class="tok-brace">}</span>
+    <span class="tok-brace">},</span>
+    <span class="tok-key">"filesystem"</span><span class="tok-brace">: {</span>
+      <span class="tok-key">"command"</span><span class="tok-brace">:</span> <span class="tok-str">"npx"</span><span class="tok-brace">,</span>
+      <span class="tok-key">"args"</span><span class="tok-brace">: [</span><span class="tok-str">"-y"</span><span class="tok-brace">,</span> <span class="tok-str">"@modelcontextprotocol/server-filesystem"</span><span class="tok-brace">,</span> <span class="tok-str">"/Users/tuusuario/bd-isbe"</span><span class="tok-brace">]</span>
+    <span class="tok-brace">}</span>
+  <span class="tok-brace">}</span>
+<span class="tok-brace">}</span></div>
+  </div>
+</div>
+</body>
+</html>
