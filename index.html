@@ -125,6 +125,46 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .demo-input-row input::placeholder{color:var(--text3)}
 .send-btn{border:1px solid var(--purple-border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;background:var(--purple-bg);color:var(--purple);font-family:'Inter',sans-serif;font-weight:500;transition:all .15s;white-space:nowrap}
 .send-btn:hover{background:#CECBF6}
+
+/* ── MULTICA ── */
+.mul-intro{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:start;border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.5rem;background:var(--surface);margin-bottom:1.5rem}
+@media(max-width:700px){.mul-intro{grid-template-columns:1fr}}
+.mul-tag{font-size:11px;font-weight:500;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem}
+.mul-title{font-size:20px;font-weight:500;margin-bottom:.6rem}
+.mul-sub{font-size:13.5px;color:var(--text2);line-height:1.65}
+.mul-stack-pill{display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0}
+.mul-stack-row{display:flex}
+.mul-layer{font-size:11px;padding:5px 12px;border-radius:20px;font-weight:500;white-space:nowrap}
+.mul-layer-new{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.mul-layer-existing{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)}
+.mul-stack-arrow{font-size:11px;color:var(--text3);text-align:right;padding-right:.5rem}
+
+.mul-concepts{display:flex;flex-direction:column;gap:.85rem;margin-bottom:.5rem}
+.mul-concept{display:flex;gap:1rem;align-items:flex-start;border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;background:var(--surface)}
+.mul-concept-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0}
+.mul-concept-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.mul-concept-desc{font-size:13px;color:var(--text2);line-height:1.65}
+
+.mul-skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;padding:0 0}
+.mul-skill{border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}
+.mul-skill-header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.25rem;border-bottom:2px solid;background:var(--surface2)}
+.mul-skill-name{font-size:12.5px;font-weight:500;font-family:monospace;color:var(--text)}
+.mul-skill-ver{font-size:10px;color:var(--text3);background:var(--surface);padding:2px 6px;border-radius:10px;border:1px solid var(--border)}
+.mul-skill-desc{font-size:12.5px;color:var(--text2);line-height:1.6;padding:.85rem 1.25rem}
+.mul-skill-tools{display:flex;flex-wrap:wrap;gap:5px;padding:.6rem 1.25rem;border-top:1px solid var(--border)}
+.mul-skill-tool{font-size:10.5px;padding:2px 8px;border-radius:20px;font-weight:500}
+.mul-skill-tool.mcp{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+
+.mul-before-after{display:grid;grid-template-columns:1fr 1px 1fr;gap:1.25rem;border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
+.mul-col{padding:1.25rem 1.4rem}
+.mul-col-hd{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.6px;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.mul-col-before{color:var(--text3)}
+.mul-col-after{color:var(--green)}
+.mul-divider{background:var(--border);width:1px}
+.mul-flow-list{display:flex;flex-direction:column;gap:.6rem}
+.mul-flow-item{font-size:13px;color:var(--text2);line-height:1.5;padding:.45rem .7rem;border-radius:6px;background:var(--surface2);border:1px solid var(--border)}
+.mul-flow-highlight{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+.mul-footer-note{margin-top:1.25rem;font-size:12px;color:var(--text3);border-top:1px solid var(--border);padding-top:.85rem;line-height:1.6}
 </style>
 </head>
 <body>
@@ -140,6 +180,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <button class="nav-btn active" onclick="switchView('workflow',this)">Workflow</button>
     <button class="nav-btn" onclick="switchView('demos',this)">Casos demo</button>
     <button class="nav-btn" onclick="switchView('mcp',this)">Arquitectura MCP</button>
+    <button class="nav-btn" onclick="switchView('multica',this)">Multica</button>
   </div>
 
   <div id="workflow" class="view active">
@@ -763,7 +804,7 @@ document.addEventListener('DOMContentLoaded',()=>{renderMcpNav();renderMcpDetail
 .tok-key{color:#185FA5}.tok-str{color:#0F6E56}.tok-num{color:#854F0B}.tok-brace{color:var(--text3)}
 </style>
 
-<div id="mcp" class="view">
+<div id="mcp" class="view" style="padding:0 2rem 2rem">
   <div class="mcp-intro">
     <div class="mcp-intro-title">MCP local para el pipeline de BD — qué es y por qué lo uso</div>
     <div class="mcp-intro-text">MCP (Model Context Protocol) es el protocolo abierto de Anthropic que permite conectar Claude con herramientas externas: CRM, sistemas de archivos, buscadores, bases de datos. Un servidor MCP es un proceso ligero que corre en local y expone un conjunto de herramientas que Claude puede invocar directamente durante una conversación. En el contexto de BD, esto significa que en lugar de abrir HubSpot, buscar el deal, copiar el contexto, ir a Claude, escribir el prompt y volver a HubSpot a pegar el resultado, todo ese flujo ocurre en una sola conversación. Los servidores que uso son todos públicos, con instalación por npx en menos de 5 minutos cada uno.</div>
@@ -838,6 +879,156 @@ document.addEventListener('DOMContentLoaded',()=>{renderMcpNav();renderMcpDetail
   <span class="tok-brace">}</span>
 <span class="tok-brace">}</span></div>
   </div>
+</div>
+
+  <div id="multica" class="view" style="padding:0 2rem 2rem">
+
+    <div class="mul-intro">
+      <div class="mul-intro-text">
+        <div class="mul-tag">Open source · 5k stars · multica.ai</div>
+        <div class="mul-title">De workflow reactivo a equipo autónomo</div>
+        <div class="mul-sub">Con la arquitectura MCP construida hasta aquí, Claude responde cuando le pregunto. Multica añade la capa de orquestación: defino tareas de BD, las asigno a agentes igual que a un compañero de equipo, y ellos ejecutan de forma autónoma usando los mismos servidores MCP. El BD humano pasa de ejecutar a revisar y aprobar.</div>
+      </div>
+      <div class="mul-stack-pill">
+        <div class="mul-stack-row">
+          <span class="mul-layer mul-layer-new">Multica — orquestación y skills</span>
+        </div>
+        <div class="mul-stack-arrow">↑ añade esta capa</div>
+        <div class="mul-stack-row">
+          <span class="mul-layer mul-layer-existing">Claude Code + 5 servidores MCP</span>
+        </div>
+        <div class="mul-stack-arrow">↑ ya construido</div>
+        <div class="mul-stack-row">
+          <span class="mul-layer mul-layer-existing">HubSpot · Notion · Drive · Brave · Filesystem</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:1rem">Los cuatro conceptos que lo cambian todo</div>
+    <div class="mul-concepts">
+
+      <div class="mul-concept">
+        <div class="mul-concept-icon" style="background:#E0F2FE;color:#0891B2">T</div>
+        <div>
+          <div class="mul-concept-title">Teammates</div>
+          <div class="mul-concept-desc">Los agentes aparecen en el mismo dropdown de asignación que los humanos. Asignar una tarea a Claude es idéntico a asignársela a un compañero. Tienen perfil, crean issues, comentan y cambian estados por su cuenta — sin que les preguntes.</div>
+        </div>
+      </div>
+
+      <div class="mul-concept">
+        <div class="mul-concept-icon" style="background:#EDE9FE;color:#534AB7">A</div>
+        <div>
+          <div class="mul-concept-title">Autonomous</div>
+          <div class="mul-concept-desc">Ciclo de vida completo: encolar → reclamar → ejecutar → completar o fallar. Cuando el agente se bloquea, lo reporta proactivamente. Asignas la tarea antes de dormir y aparece completada por la mañana. Sin prompt-respuesta — trabajo real en background.</div>
+        </div>
+      </div>
+
+      <div class="mul-concept">
+        <div class="mul-concept-icon" style="background:#D1FAE5;color:#0F7B4F">S</div>
+        <div>
+          <div class="mul-concept-title">Skills</div>
+          <div class="mul-concept-desc">Capacidades reutilizables — código, configuración y contexto empaquetados. Defines un skill de "research de cuenta" una vez y todos los agentes pueden usarlo. La biblioteca crece de forma compuesta: lo que un agente aprende hoy, todos lo saben mañana.</div>
+        </div>
+      </div>
+
+      <div class="mul-concept">
+        <div class="mul-concept-icon" style="background:#FEF3C7;color:#854F0B">R</div>
+        <div>
+          <div class="mul-concept-title">Runtimes</div>
+          <div class="mul-concept-desc">Daemon local y cloud en un mismo panel. Multica detecta automáticamente Claude Code y Codex instalados. Ejecutas <code style="font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:4px">multica daemon start</code> y el agente está listo para recibir tareas del tablero.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-label" style="margin-top:1.5rem;margin-bottom:1rem">Skills de BD — definidos una vez, reutilizados en cada deal</div>
+    <div class="mul-skills-grid">
+      <div class="mul-skill">
+        <div class="mul-skill-header" style="border-color:#0891B2">
+          <span class="mul-skill-name">research_account</span>
+          <span class="mul-skill-ver">v1.0</span>
+        </div>
+        <div class="mul-skill-desc">Investiga una empresa objetivo: noticias recientes (Brave Search MCP), señales de interés en DLT o regulación, y genera la ficha de scoring de fit para ISBE. Crea el Company en HubSpot con propiedades custom pre-rellenadas.</div>
+        <div class="mul-skill-tools">
+          <span class="mul-skill-tool mcp">Brave Search MCP</span>
+          <span class="mul-skill-tool mcp">HubSpot MCP</span>
+          <span class="mul-skill-tool mcp">Filesystem MCP</span>
+        </div>
+      </div>
+
+      <div class="mul-skill">
+        <div class="mul-skill-header" style="border-color:#534AB7">
+          <span class="mul-skill-name">draft_outreach</span>
+          <span class="mul-skill-ver">v1.0</span>
+        </div>
+        <div class="mul-skill-desc">Lee el template ABM del vertical correcto (Filesystem MCP), personaliza el mensaje con el contexto de la cuenta y la regulación relevante, y crea el Deal en HubSpot en etapa "Contacto iniciado" con el email listo para revisar y enviar.</div>
+        <div class="mul-skill-tools">
+          <span class="mul-skill-tool mcp">Filesystem MCP</span>
+          <span class="mul-skill-tool mcp">HubSpot MCP</span>
+        </div>
+      </div>
+
+      <div class="mul-skill">
+        <div class="mul-skill-header" style="border-color:#0F7B4F">
+          <span class="mul-skill-name">process_discovery</span>
+          <span class="mul-skill-ver">v1.0</span>
+        </div>
+        <div class="mul-skill-desc">Lee la transcripción de la discovery call en Google Drive, extrae problema, stakeholders y objeciones, avanza el Deal en HubSpot a "Discovery completado", crea los Contacts con sus roles y programa la tarea de follow-up.</div>
+        <div class="mul-skill-tools">
+          <span class="mul-skill-tool mcp">Google Drive MCP</span>
+          <span class="mul-skill-tool mcp">HubSpot MCP</span>
+        </div>
+      </div>
+
+      <div class="mul-skill">
+        <div class="mul-skill-header" style="border-color:#854F0B">
+          <span class="mul-skill-name">adapt_proposal</span>
+          <span class="mul-skill-ver">v1.0</span>
+        </div>
+        <div class="mul-skill-desc">Lee el template de propuesta del vertical en Notion, adapta el business case al caso de uso concreto del deal, crea el borrador en Google Drive y actualiza el Deal en HubSpot con ARR estimado y fecha de cierre prevista.</div>
+        <div class="mul-skill-tools">
+          <span class="mul-skill-tool mcp">Notion MCP</span>
+          <span class="mul-skill-tool mcp">Google Drive MCP</span>
+          <span class="mul-skill-tool mcp">HubSpot MCP</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-label" style="margin-top:1.5rem;margin-bottom:1rem">Cómo cambia el flujo de trabajo diario</div>
+    <div class="mul-before-after">
+      <div class="mul-col">
+        <div class="mul-col-hd mul-col-before">Antes — workflow reactivo</div>
+        <div class="mul-flow-list">
+          <div class="mul-flow-item">Abro Claude Desktop y escribo el prompt de research</div>
+          <div class="mul-flow-item">Copio el resultado y lo pego en HubSpot manualmente</div>
+          <div class="mul-flow-item">Abro la plantilla, la adapto, la envío por separado</div>
+          <div class="mul-flow-item">Después de la discovery, transcribo y resumo yo</div>
+          <div class="mul-flow-item">Actualizo el deal en HubSpot campo por campo</div>
+          <div class="mul-flow-item">Repito el proceso para cada cuenta, cada fase</div>
+        </div>
+      </div>
+      <div class="mul-divider"></div>
+      <div class="mul-col">
+        <div class="mul-col-hd mul-col-after">Con Multica — workflow autónomo</div>
+        <div class="mul-flow-list">
+          <div class="mul-flow-item mul-flow-highlight">Asigno "Investiga 15 cuentas logísticas bajo EUDR" al agente</div>
+          <div class="mul-flow-item mul-flow-highlight">El agente ejecuta research_account × 15 en background</div>
+          <div class="mul-flow-item mul-flow-highlight">Aparezco con 15 Companies en HubSpot scored y emails redactados</div>
+          <div class="mul-flow-item mul-flow-highlight">Tras la discovery: subo la grabación, asigno process_discovery</div>
+          <div class="mul-flow-item mul-flow-highlight">El Deal se actualiza solo con stakeholder map y próximos pasos</div>
+          <div class="mul-flow-item mul-flow-highlight">Me concentro en las llamadas y el cierre — no en el CRM</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mul-footer-note">
+      Multica es open source (Apache 2.0), self-hostable con Docker Compose y compatible con Claude Code y Codex. Los datos nunca salen de tu infraestructura.
+      <a href="https://multica.ai" target="_blank" style="color:var(--blue);margin-left:.5rem">multica.ai →</a>
+    </div>
+
+  </div>
+
 </div>
 </body>
 </html>
